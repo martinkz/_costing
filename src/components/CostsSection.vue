@@ -22,15 +22,17 @@
             <!-- <v-card-text v-text="text"></v-card-text> -->
             <v-container>
               <v-select :items="brands" filled label="Radio Brand" @change="selectChange($event)" v-model="currentBrand"></v-select>
-              <v-select :items="regions" filled label="Region" @change="selectChange($event)" v-model="currentRegion"></v-select>
-              <v-select :items="regions" filled label="Multiple Regions" multiple></v-select>
+              <!-- <v-select :items="regions" filled label="Region" @change="selectChange($event)" v-model="currentRegion"></v-select> -->
+              <v-select :items="regions" filled label="Multiple Regions" multiple v-model="currentRegions"></v-select>
             </v-container>
-            <v-container class="summary" v-if="getDataForCurrentRegion">
-              <h2>Summary for  {{ getDataForCurrentRegion['Heart Regions'] }}</h2>
-              <h3>Monthly Home Page Views: {{ getDataForCurrentRegion['Monthly Home Page Views'] }}</h3> 
-              <h3>Daily Home Page Views: {{ getDataForCurrentRegion['Daily Home Page Views'] }}</h3> 
-              <h3>Daily Cost: {{ getDataForCurrentRegion['Daily Cost'] }}</h3> 
-              <h3>7 day cost: {{ getDataForCurrentRegion['7 day cost'] }}</h3> 
+            <v-container class="summary" v-if="getDataForCurrentRegions">
+              <h2>Summary for the selected regions</h2>
+              <h3>Monthly Home Page Views: {{ getDataForCurrentRegions['Monthly Home Page Views'] }}</h3> 
+              <h3>Daily Home Page Views: {{ getDataForCurrentRegions['Daily Home Page Views'] }}</h3> 
+              <h3>Daily Cost: £{{ getDataForCurrentRegions['Daily Cost'] }}</h3> 
+              <h3>7 day cost: £{{ getDataForCurrentRegions['7 day cost'] }}</h3> 
+              <h3 v-if="getDataForCurrentRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDataForCurrentRegions['UK Monthly full site views'] }}</h3> 
+              <h3 v-if="getDataForCurrentRegions['UK Monthly users']">UK Monthly users: {{ getDataForCurrentRegions['UK Monthly users'] }}</h3> 
             </v-container>
           </v-card>
         </v-tab-item>
@@ -41,13 +43,15 @@
 </template>
 
 <script>
-import costData from '../data/costData.js';
+  import costData from '../data/costData.js';
+
   export default {
     // name: 'HelloWorld',
 
     data: () => ({
         currentBrand: undefined,
-        currentRegion: undefined,
+        // currentRegion: undefined,
+        currentRegions: [],
         brands: ['Heart'],
         brandData: costData,
         tab: null,
@@ -59,9 +63,33 @@ import costData from '../data/costData.js';
         regions() {
           return this.brandData[this.currentBrand] ? this.brandData[this.currentBrand].map((item)=>item['Heart Regions']) : [];
         },
-        getDataForCurrentRegion() {
-          return this.currentBrand && this.currentRegion ? this.brandData[this.currentBrand].find(el => el['Heart Regions'] === this.currentRegion) : undefined;
+        // getDataForCurrentRegion() {
+        //   return this.currentBrand && this.currentRegion ? this.brandData[this.currentBrand].find(el => el['Heart Regions'] === this.currentRegion) : undefined;
+        // },
+        getDataForCurrentRegions() {
+          if(this.currentRegions.length > 0) {
+            let combinedData = [];
+            if(this.currentBrand && this.currentRegions.length > 0) {
+              this.currentRegions.forEach((region) => {
+                combinedData.push(this.brandData[this.currentBrand].find(el => el['Heart Regions'] === region));
+              });
+            }
+            return combinedData.reduce((prev, current) => {
+              return { 
+                'Monthly Home Page Views': prev['Monthly Home Page Views']*1 + current['Monthly Home Page Views']*1,
+                'Daily Home Page Views': prev['Daily Home Page Views']*1 + current['Daily Home Page Views']*1,
+                'Daily Cost': prev['Daily Cost']*1 + current['Daily Cost']*1,
+                '7 day cost': prev['7 day cost']*1 + current['7 day cost']*1, 
+                }  
+            });
+          }
         }
+    },
+
+    watch: {
+      currentBrand() {
+        if(this.currentBrand && this.currentRegions.length === 0) this.currentRegions.push("NETWORK");
+      }
     },
 
     methods: {
