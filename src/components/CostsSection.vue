@@ -44,6 +44,24 @@
 
 <script>
   import costData from '../data/costData.js';
+  let sheetData = {};
+  let brandList = [];
+
+  // fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values/Heart?key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
+  fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?ranges=Heart&ranges=Capital&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
+  .then(response => response.json())
+  .then(data => {
+      data['valueRanges'].forEach( sheet => {
+        let brand = sheet['range'].substring(0, sheet['range'].indexOf("!"));
+        sheetData[brand] = sheet['values'].map( el => {
+          let obj = {};
+          sheet['values'][0].forEach((item,idx) => { obj[item] = isNaN(el[idx]) ? el[idx] : Number(el[idx]) })
+          return obj;
+        });
+        sheetData[brand].shift();
+      });
+      brandList.push(...Object.keys(sheetData));
+  });
 
   export default {
     // name: 'HelloWorld',
@@ -52,8 +70,8 @@
         currentBrand: undefined,
         // currentRegion: undefined,
         currentRegions: [],
-        brands: ['Heart'],
-        brandData: costData,
+        brands: brandList,
+        brandData: sheetData,
         tab: null,
         items2: [ 'Pages', ],
         // text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
@@ -61,25 +79,25 @@
 
     computed: {
         regions() {
-          return this.brandData[this.currentBrand] ? this.brandData[this.currentBrand].map((item)=>item['Heart Regions']) : [];
+          return this.brandData[this.currentBrand] ? this.brandData[this.currentBrand].map((item)=>item['Regions']) : [];
         },
         // getDataForCurrentRegion() {
-        //   return this.currentBrand && this.currentRegion ? this.brandData[this.currentBrand].find(el => el['Heart Regions'] === this.currentRegion) : undefined;
+        //   return this.currentBrand && this.currentRegion ? this.brandData[this.currentBrand].find(el => el['Regions'] === this.currentRegion) : undefined;
         // },
         getDataForCurrentRegions() {
           if(this.currentRegions.length > 0) {
             let combinedData = [];
             if(this.currentBrand && this.currentRegions.length > 0) {
               this.currentRegions.forEach((region) => {
-                combinedData.push(this.brandData[this.currentBrand].find(el => el['Heart Regions'] === region));
+                combinedData.push(this.brandData[this.currentBrand].find(el => el['Regions'] === region));
               });
             }
             return combinedData.reduce((prev, current) => {
               return { 
-                'Monthly Home Page Views': prev['Monthly Home Page Views']*1 + current['Monthly Home Page Views']*1,
-                'Daily Home Page Views': prev['Daily Home Page Views']*1 + current['Daily Home Page Views']*1,
-                'Daily Cost': prev['Daily Cost']*1 + current['Daily Cost']*1,
-                '7 day cost': prev['7 day cost']*1 + current['7 day cost']*1, 
+                'Monthly Home Page Views': prev['Monthly Home Page Views'] + current['Monthly Home Page Views'],
+                'Daily Home Page Views': prev['Daily Home Page Views'] + current['Daily Home Page Views'],
+                'Daily Cost': prev['Daily Cost'] + current['Daily Cost'],
+                '7 day cost': prev['7 day cost'] + current['7 day cost'], 
                 }  
             });
           }
@@ -96,7 +114,7 @@
       selectChange(evt){
         console.log(evt);
       },
-    }
+    },
   }
 </script>
 
