@@ -29,8 +29,8 @@
               <h2>Summary for the selected regions</h2>
               <h3>Monthly Home Page Views: {{ getDataForCurrentRegions['Monthly Home Page Views'] }}</h3> 
               <h3>Daily Home Page Views: {{ getDataForCurrentRegions['Daily Home Page Views'] }}</h3> 
-              <h3>Daily Cost: £{{ getDataForCurrentRegions['Daily Cost'] }}</h3> 
-              <h3>7 day cost: £{{ getDataForCurrentRegions['7 day cost'] }}</h3> 
+              <h3>Daily Cost: £{{ getDataForCurrentRegions['Daily Cost'].toFixed(2) }}</h3> 
+              <h3>7 day cost: £{{ getDataForCurrentRegions['7 day cost'].toFixed(2) }}</h3> 
               <h3 v-if="getDataForCurrentRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDataForCurrentRegions['UK Monthly full site views'] }}</h3> 
               <h3 v-if="getDataForCurrentRegions['UK Monthly users']">UK Monthly users: {{ getDataForCurrentRegions['UK Monthly users'] }}</h3> 
             </v-container>
@@ -106,7 +106,8 @@
 
     watch: {
       currentBrand() {
-        if(this.currentBrand && this.currentRegions.length === 0) this.currentRegions.push("NETWORK");
+        this.currentRegions.splice(0, this.currentRegions.length)
+        this.currentRegions.push("NETWORK");
       }
     },
 
