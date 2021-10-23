@@ -21,9 +21,10 @@
           <v-card flat>
             <!-- <v-card-text v-text="text"></v-card-text> -->
             <v-container>
-              <v-select :items="brands" filled label="Radio Brand" @change="selectChange($event)" v-model="currentBrand"></v-select>
+              <v-select :items="brands" filled label="Radio brand" @change="selectChange($event)" v-model="currentBrand"></v-select>
               <!-- <v-select :items="regions" filled label="Region" @change="selectChange($event)" v-model="currentRegion"></v-select> -->
-              <v-select :items="regions" filled label="Multiple Regions" multiple v-model="currentRegions"></v-select>
+              <v-select :items="regions" filled label="Regions" multiple v-model="currentRegions"></v-select>
+              <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
             </v-container>
             <v-container class="summary" v-if="getDataForCurrentRegions">
               <h2>Summary for the selected regions</h2>
@@ -46,6 +47,7 @@
   import costData from '../data/costData.js';
   let sheetData = {};
   let brandList = [];
+  let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
 
   // fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values/Heart?key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
   fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?ranges=Heart&ranges=Capital&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
@@ -64,17 +66,17 @@
   });
 
   export default {
-    // name: 'HelloWorld',
 
     data: () => ({
         currentBrand: undefined,
         // currentRegion: undefined,
         currentRegions: [],
+        pageTypes: pageTypes,
+        currentPageType: undefined,
         brands: brandList,
         brandData: sheetData,
         tab: null,
         items2: [ 'Pages', ],
-        // text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     }),
 
     computed: {
