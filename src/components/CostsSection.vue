@@ -1,27 +1,33 @@
 <template>
   <v-container>
+    
+    <v-sheet color="white">
+      <!-- <v-container> -->
+        <!-- <v-select :items="brands" outlined label="Radio brand" @change="selectChange($event)" v-model="currentBrand"></v-select> -->
+        <v-tabs v-model="radioBrandTab" background-color="deep-purple" fixed-tabs dark>
+          <v-tab v-for="item in radioBrands" :key="item">
+            {{ item }}
+          </v-tab>
+        </v-tabs>
+      <!-- </v-container> -->
+    </v-sheet>
+    <v-container></v-container>
     <v-card>
-      <v-toolbar color="cyan" dark flat>
-
-        <v-toolbar-title>Dashboard</v-toolbar-title>
-
-        <template v-slot:extension>
-          <v-tabs v-model="tab" align-with-title>
-            <v-tabs-slider color="cyan darken-3"></v-tabs-slider>
-
+      <v-sheet color="cyan" dark>
+        <!-- <template v-slot:extension> -->
+          <v-tabs v-model="tab" background-color="deep-purple" fixed-tabs>
             <v-tab v-for="item in items2" :key="item">
               {{ item }}
             </v-tab>
           </v-tabs>
-        </template>
-      </v-toolbar>
+        <!-- </template> -->
+      </v-sheet>
 
       <v-tabs-items v-model="tab">
-        <v-tab-item v-for="item in items2" :key="item">
+        <v-tab-item>
           <v-card flat>
             <!-- <v-card-text v-text="text"></v-card-text> -->
             <v-container>
-              <v-select :items="brands" filled label="Radio brand" @change="selectChange($event)" v-model="currentBrand"></v-select>
               <!-- <v-select :items="regions" filled label="Region" @change="selectChange($event)" v-model="currentRegion"></v-select> -->
               <v-select :items="regions" filled label="Regions" multiple v-model="currentRegions"></v-select>
               <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
@@ -37,6 +43,18 @@
             </v-container>
           </v-card>
         </v-tab-item>
+
+        <v-tab-item>
+          <v-container>
+            <h2>CRM</h2>
+          </v-container>
+        </v-tab-item>
+        
+        <v-tab-item>
+          <v-container>
+            <h2>Video</h2>
+          </v-container>
+        </v-tab-item>
       </v-tabs-items>
     </v-card>
 
@@ -48,27 +66,12 @@
   let sheetData = {};
   let brandList = [];
   let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
-
-  // fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values/Heart?key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
-  fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?ranges=Heart&ranges=Capital&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
-  .then(response => response.json())
-  .then(data => {
-      data['valueRanges'].forEach( sheet => {
-        let brand = sheet['range'].substring(0, sheet['range'].indexOf("!"));
-        sheetData[brand] = sheet['values'].map( el => {
-          let obj = {};
-          sheet['values'][0].forEach((item,idx) => { obj[item] = isNaN(el[idx]) ? el[idx] : Number(el[idx]) })
-          return obj;
-        });
-        sheetData[brand].shift();
-      });
-      brandList.push(...Object.keys(sheetData));
-  });
+  let radioBrands = ['Heart', 'Capital', 'Capital XTRA', 'Classic', 'Smooth', 'Radio X', 'LBC', 'Gold'];
 
   export default {
 
     data: () => ({
-        currentBrand: undefined,
+        // currentBrand: 'Heart',
         // currentRegion: undefined,
         currentRegions: [],
         pageTypes: pageTypes,
@@ -76,10 +79,15 @@
         brands: brandList,
         brandData: sheetData,
         tab: null,
-        items2: [ 'Pages', ],
+        radioBrandTab: 0,
+        radioBrands: radioBrands,
+        items2: [ 'Pages', 'CRM', "Video" ],
     }),
 
     computed: {
+        currentBrand() {
+          return this.radioBrands[this.radioBrandTab];
+        },
         regions() {
           return this.brandData[this.currentBrand] ? this.brandData[this.currentBrand].map((item)=>item['Regions']) : [];
         },
@@ -90,6 +98,7 @@
           if(this.currentRegions.length > 0) {
             let combinedData = [];
             if(this.currentBrand && this.currentRegions.length > 0) {
+              // console.log(this.brandData,this.currentBrand, this.brandData['Heart']);
               this.currentRegions.forEach((region) => {
                 combinedData.push(this.brandData[this.currentBrand].find(el => el['Regions'] === region));
               });
@@ -110,7 +119,7 @@
       currentBrand() {
         this.currentRegions.splice(0, this.currentRegions.length)
         this.currentRegions.push("NETWORK");
-      }
+      },
     },
 
     methods: {
@@ -118,12 +127,31 @@
         console.log(evt);
       },
     },
+
+    created() {
+      // fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values/Heart?key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
+      fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?ranges=Heart&ranges=Capital&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
+      .then(response => response.json())
+      .then(data => {
+          data['valueRanges'].forEach( sheet => {
+            let brand = sheet['range'].substring(0, sheet['range'].indexOf("!"));
+            this.$set(sheetData, brand, sheet['values'].map( el => {
+              let obj = {};
+              sheet['values'][0].forEach((item,idx) => { obj[item] = isNaN(el[idx]) ? el[idx] : Number(el[idx]) })
+              return obj;
+            }));
+            sheetData[brand].shift();
+          });
+          brandList.push(...Object.keys(sheetData));
+          this.currentRegions.push("NETWORK");
+      });
+    },
+
   }
 </script>
 
 <style scoped>
-  /* .summary {
-    max-width: 550px;
-    margin: 0 auto;
+  /* .container {
+      max-width: 1000px;
   } */
 </style>
