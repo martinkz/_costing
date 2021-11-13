@@ -66,7 +66,7 @@
   let sheetData = {};
   let brandList = [];
   let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
-  let radioBrands = ['Heart', 'Capital', 'Capital XTRA', 'Classic', 'Smooth', 'Radio X', 'LBC', 'Gold'];
+  let radioBrands = ['Heart', 'Capital', 'Smooth', 'CapitalXTRA', 'Classic', 'RadioX', 'LBC', 'Gold'];
 
   export default {
 
@@ -130,7 +130,7 @@
 
     created() {
       // fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values/Heart?key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
-      fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?ranges=Heart&ranges=Capital&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
+      fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?ranges=Heart&ranges=Capital&ranges=Smooth&ranges=CapitalXTRA&ranges=Classic&ranges=RadioX&ranges=LBC&ranges=Gold&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
       .then(response => response.json())
       .then(data => {
           data['valueRanges'].forEach( sheet => {
