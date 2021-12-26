@@ -7,14 +7,12 @@
 </template>
 
 <script>
-import HelloWorld from './components/CostsSection';
 import CostsSection from './components/CostsSection';
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
     CostsSection,
   },
 
