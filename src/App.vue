@@ -23,3 +23,9 @@ export default {
   }),
 };
 </script>
+
+<style scoped>
+  .v-application {
+    background: #dddddd !important;
+  }
+</style>
