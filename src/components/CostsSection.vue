@@ -31,7 +31,7 @@
               <!-- <v-select :items="regions" filled label="Region" @change="selectChange($event)" v-model="currentRegion"></v-select> -->
               <v-select :items="regions" filled label="Regions" multiple v-model="currentRegions"></v-select>
               <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
-              <v-text-field label="Campaign Days" type="number" filled v-model="pageDays"/>
+              <v-text-field label="Campaign Days" min="1" max="365" type="number" filled v-model="pageDays"/>
             </v-container>
           </v-card>
         </v-tab-item>
@@ -66,7 +66,7 @@
       <h3>Monthly Home Page Views: {{ getDataForCurrentRegions['Monthly Home Page Views'] }}</h3> 
       <h3>Daily Home Page Views: {{ getDataForCurrentRegions['Daily Home Page Views'] }}</h3> 
       <h3>Daily Cost: £{{ getDataForCurrentRegions['Daily Cost'].toFixed(2) }}</h3> 
-      <h3>7 day cost: £{{ getDataForCurrentRegions['7 day cost'].toFixed(2) }}</h3> 
+      <h3>{{pageDays}} day cost: £{{ (getDataForCurrentRegions['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
       <h3 v-if="getDataForCurrentRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDataForCurrentRegions['UK Monthly full site views'] }}</h3> 
       <h3 v-if="getDataForCurrentRegions['UK Monthly users']">UK Monthly users: {{ getDataForCurrentRegions['UK Monthly users'] }}</h3> 
       <!-- <hr> -->
