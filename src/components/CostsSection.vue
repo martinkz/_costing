@@ -28,8 +28,7 @@
             <!-- <v-card-text v-text="text"></v-card-text> -->
             <v-container>
               <h2>Competition page</h2>
-              <!-- <v-select :items="regions" filled label="Region" @change="selectChange($event)" v-model="currentRegion"></v-select> -->
-              <v-select :items="regions" filled label="Regions" multiple v-model="currentRegions"></v-select>
+              <v-select :items="regions" filled label="Regions" multiple v-model="currentRegions[currentBrand]"></v-select>
               <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
               <v-text-field label="Campaign Days" min="1" max="365" type="number" filled v-model="pageDays"/>
             </v-container>
@@ -48,7 +47,7 @@
             <h2>Video</h2>
             <v-slider v-model="videoViews" label="Video views" thumb-color="#ff5252" thumb-label="always" min="200" max="4000" step="50" thumb-size="40">
               <template v-slot:thumb-label="item">
-                {{item.value<1000?item.value+'k':item.value/1000+'M'}}
+                {{ item.value < 1000 ? item.value+'k' : item.value/1000+'M' }}
               </template>
             </v-slider>
           </v-container>
@@ -74,7 +73,7 @@
 </template>
 
 <script>
-  import costData from '../data/costData.js';
+  // import costData from '../data/costData.js';
   let sheetData = {};
   let brandList = [];
   let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
@@ -84,9 +83,7 @@
   export default {
 
     data: () => ({
-        // currentBrand: 'Heart',
-        // currentRegion: undefined,
-        currentRegions: [],
+        currentRegions: Object.fromEntries(radioBrands.map(k => [k, []])),
         crmRegions: [],
         pageTypes: pageTypes,
         currentPageType: undefined,
@@ -112,11 +109,11 @@
         //   return this.currentBrand && this.currentRegion ? this.brandData[this.currentBrand].find(el => el['Regions'] === this.currentRegion) : undefined;
         // },
         getDataForCurrentRegions() {
-          if(this.currentRegions.length > 0) {
+          if(this.currentRegions[this.currentBrand].length > 0) {
             let combinedData = [];
-            if(this.currentBrand && this.currentRegions.length > 0) {
+            if(this.currentBrand && this.currentRegions[this.currentBrand].length > 0) {
               // console.log(this.brandData,this.currentBrand, this.brandData['Heart']);
-              this.currentRegions.forEach((region) => {
+              this.currentRegions[this.currentBrand].forEach((region) => {
                 combinedData.push(this.brandData[this.currentBrand].find(el => el['Regions'] === region));
               });
             }
@@ -133,10 +130,7 @@
     },
 
     watch: {
-      currentBrand() {
-        this.currentRegions.splice(0, this.currentRegions.length)
-        this.currentRegions.push("NETWORK");
-      },
+
     },
 
     methods: {
@@ -160,8 +154,7 @@
             sheetData[brand].shift();
           });
           brandList.push(...Object.keys(sheetData));
-          this.currentRegions.push("NETWORK");
-          this.crmRegions.push("NETWORK");
+          Object.keys(this.currentRegions).forEach(el => (this.currentRegions[el].push("NETWORK")));
       });
     },
 
