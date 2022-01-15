@@ -39,22 +39,18 @@
         <v-tab-item>
           <v-container>
             <h2>CRM</h2>
-            <v-select :items="regions" filled label="Regions" multiple v-model="crmRegions"></v-select>
+            <!-- <v-select :items="regions" filled label="Regions" multiple v-model="crmRegions"></v-select> -->
           </v-container>
         </v-tab-item>
         
         <v-tab-item>
           <v-container>
             <h2>Video</h2>
-            <v-slider
-              v-model="videoViews"
-              label="Video views"
-              thumb-color="#ff5252"
-              thumb-label="always"
-              max="10000"
-              step="100"
-              thumb-size="36"
-            ></v-slider>
+            <v-slider v-model="videoViews" label="Video views" thumb-color="#ff5252" thumb-label="always" min="200" max="4000" step="50" thumb-size="40">
+              <template v-slot:thumb-label="item">
+                {{item.value<1000?item.value+'k':item.value/1000+'M'}}
+              </template>
+            </v-slider>
           </v-container>
         </v-tab-item>
       </v-tabs-items>
@@ -69,6 +65,8 @@
       <h3>{{pageDays}} day cost: £{{ (getDataForCurrentRegions['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
       <h3 v-if="getDataForCurrentRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDataForCurrentRegions['UK Monthly full site views'] }}</h3> 
       <h3 v-if="getDataForCurrentRegions['UK Monthly users']">UK Monthly users: {{ getDataForCurrentRegions['UK Monthly users'] }}</h3> 
+      <hr>
+      <h3>Video cost: £{{ videoViews*50 }}</h3> 
       <!-- <hr> -->
       <!-- <h3>Video Views</h3> -->
     </v-container>
@@ -99,8 +97,8 @@
         radioBrands: radioBrands,
         radioLogos: radioLogos,
         pageDays: 7,
-        videoViews: 5000,
-        items2: [ 'Pages', 'CRM', "Video" ],
+        videoViews: 500,
+        items2: [ 'Page', 'CRM', "Video" ],
     }),
 
     computed: {
