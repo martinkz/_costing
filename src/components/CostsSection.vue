@@ -45,9 +45,9 @@
         <v-tab-item>
           <v-container>
             <h2>Video</h2>
-            <v-slider v-model="videoViews" label="Video views" thumb-color="#ff5252" thumb-label="always" min="200" max="4000" step="50" thumb-size="40">
+            <v-slider v-model="videoViews" label="Video views / cost" thumb-color="#ff5252" thumb-label="always" min="200" max="4000" step="50" thumb-size="75">
               <template v-slot:thumb-label="item">
-                {{ item.value < 1000 ? item.value+'k' : item.value/1000+'M' }}
+                {{ item.value < 1000 ? item.value+'k' : item.value/1000+'M' }} <br> {{ cf(videoViews*50) }}
               </template>
             </v-slider>
           </v-container>
@@ -56,7 +56,7 @@
     </v-card>
 
     <v-container class="summary" v-if="getDataForCurrentRegions">
-      <h2>Summary for the selected regions</h2>
+      <h2>Summary for {{ currentBrand }}</h2>
       <hr>
       <h3>Monthly Home Page Views: {{ getDataForCurrentRegions['Monthly Home Page Views'] }}</h3> 
       <h3>Daily Home Page Views: {{ getDataForCurrentRegions['Daily Home Page Views'] }}</h3> 
@@ -75,6 +75,7 @@
 <script>
   // import costData from '../data/costData.js';
   let sheetData = {};
+  let CRM_Data = {};
   let brandList = [];
   let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
   let radioBrands = ['Heart', 'Capital', 'Smooth', 'CapitalXTRA', 'Classic', 'RadioX', 'LBC', 'Gold'];
@@ -137,6 +138,16 @@
       selectChange(evt){
         console.log(evt);
       },
+      cf(num) { // currency formatting function
+        let formatter = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'GBP',
+          maximumFractionDigits: 0 // (causes 2500.99 to be printed as £2,501)
+          //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as £2,500.1)
+        });
+
+        return formatter.format(num); /* £2,500 */
+      }
     },
 
     created() {
@@ -171,13 +182,7 @@
     margin-bottom: 1rem;
   }
 
-  .radio-tabs {
-    // Doesn't work for some reason
-    // .v-tabs-bar {
-    //   height: 55px !important;
-    // }
-    
-  }
+
 
   .v-tab--active {
       background: #3b0f89;
@@ -187,4 +192,39 @@
     max-width: 90px;
     max-height: 36px;
   }
+</style>
+
+<!-- Non-scoped styles, to overwrite Vuetfy defaults -->
+<style lang="scss">
+  .v-slider__thumb-label {
+    border-radius: 9px !important;
+    text-align: center;
+    height: 45px !important;
+    transform: translateY(-15%) translateY(-12px) translateX(-50%) !important;
+
+
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; 
+      height: 0; 
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid rgb(255, 82, 82);
+    }
+
+    > * {
+      transform: none !important;
+    }
+  }
+
+  // .radio-tabs {
+  //   .v-tabs-bar {
+  //     height: 75px !important;
+  //   }
+  // }
 </style>
