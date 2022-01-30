@@ -38,14 +38,16 @@
         <v-tab-item>
           <v-container>
             <h2>CRM</h2>
-            <!-- <v-select :items="regions" filled label="Regions" multiple v-model="crmRegions"></v-select> -->
+            <v-select :items="currentCRM_Regions" filled label="Regions" multiple v-model="selectedCRM_Regions[currentBrand]"></v-select>
           </v-container>
         </v-tab-item>
         
         <v-tab-item>
           <v-container>
             <h2>Video</h2>
-            <v-slider v-model="videoViews" label="Video views / cost" thumb-color="#ff5252" thumb-label="always" min="200" max="4000" step="50" thumb-size="75">
+            <!-- <v-text-field label="Videos" min="1" max="100" type="number" filled v-model="videoNum"/> -->
+            <v-select :items="videoNumList" filled label="Number of videos" v-model="videoNum"></v-select>
+            <v-slider class="video-slider" v-model="videoViews" :readonly="videoNum==0" label="Video views / cost" thumb-color="#ff5252" thumb-label="always" :min="videoNum*200" :max="videoNum > 0 ? 4000 : 0" step="50" thumb-size="75">
               <template v-slot:thumb-label="item">
                 {{ item.value < 1000 ? item.value+'k' : item.value/1000+'M' }} <br> {{ cf(videoViews*50) }}
               </template>
@@ -55,17 +57,27 @@
       </v-tabs-items>
     </v-card>
 
-    <v-container class="summary" v-if="getDataForCurrentRegions">
+    <v-container class="summary">
       <h2>Summary for {{ currentBrand }}</h2>
       <hr>
-      <h3>Monthly Home Page Views: {{ getDataForCurrentRegions['Monthly Home Page Views'] }}</h3> 
-      <h3>Daily Home Page Views: {{ getDataForCurrentRegions['Daily Home Page Views'] }}</h3> 
-      <h3>Daily Cost: £{{ getDataForCurrentRegions['Daily Cost'].toFixed(2) }}</h3> 
-      <h3>{{pageDays}} day cost: £{{ (getDataForCurrentRegions['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
-      <h3 v-if="getDataForCurrentRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDataForCurrentRegions['UK Monthly full site views'] }}</h3> 
-      <h3 v-if="getDataForCurrentRegions['UK Monthly users']">UK Monthly users: {{ getDataForCurrentRegions['UK Monthly users'] }}</h3> 
-      <hr>
-      <h3>Video cost: £{{ videoViews*50 }}</h3> 
+      <div v-if="getDataForCurrentRegions">
+        <h3>Monthly Home Page Views: {{ getDataForCurrentRegions['Monthly Home Page Views'] }}</h3> 
+        <h3>Daily Home Page Views: {{ getDataForCurrentRegions['Daily Home Page Views'] }}</h3> 
+        <h3>Daily Cost: £{{ getDataForCurrentRegions['Daily Cost'].toFixed(2) }}</h3> 
+        <h3>{{pageDays}} day cost: £{{ (getDataForCurrentRegions['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
+        <h3 v-if="getDataForCurrentRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDataForCurrentRegions['UK Monthly full site views'] }}</h3> 
+        <h3 v-if="getDataForCurrentRegions['UK Monthly users']">UK Monthly users: {{ getDataForCurrentRegions['UK Monthly users'] }}</h3> 
+        <hr>
+      </div>
+      <div v-if="getDisplayDataForSelectedCRMRegions">
+        <h3>Volumes: {{ getDisplayDataForSelectedCRMRegions['Volumes'] }}</h3> 
+        <h3>Avg OR Reach: {{ getDisplayDataForSelectedCRMRegions['Avg OR Reach'] }}</h3> 
+        <h3>Solus: {{ cf(getDisplayDataForSelectedCRMRegions['Solus']) }}</h3>
+        <h3>Newsletter: {{ cf(getDisplayDataForSelectedCRMRegions['Newsletter']) }}</h3>
+        <h3>Banner: {{ cf(getDisplayDataForSelectedCRMRegions['Banner']) }}</h3>
+        <hr>
+      </div>
+      <h3 v-if="videoNum > 0">Video cost: {{ cf(videoViews*50) }}</h3> 
       <!-- <hr> -->
       <!-- <h3>Video Views</h3> -->
     </v-container>
@@ -76,7 +88,7 @@
   // import costData from '../data/costData.js';
   let sheetData = {};
   let CRM_Data = {};
-  let brandList = [];
+  // let brandList = [];
   let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
   let radioBrands = ['Heart', 'Capital', 'Smooth', 'CapitalXTRA', 'Classic', 'RadioX', 'LBC', 'Gold'];
   let radioLogos = ['Heart_White_Nostrap.svg', 'Capital_White.png', 'smooth-white.png', 'CapitalXtra_White.png', 'Classic_white_min.svg', 'RadioX_Landscape_White.svg', 'LBC_White_Strap.svg', 'Gold.svg'];
@@ -85,17 +97,20 @@
 
     data: () => ({
         currentRegions: Object.fromEntries(radioBrands.map(k => [k, []])),
-        crmRegions: [],
+        selectedCRM_Regions: Object.fromEntries(radioBrands.map(k => [k, []])),
         pageTypes: pageTypes,
         currentPageType: undefined,
-        brands: brandList,
+        // brands: brandList,
         brandData: sheetData,
+        CRMData: CRM_Data,
         tab: null,
         radioBrandTab: 0,
         radioBrands: radioBrands,
         radioLogos: radioLogos,
         pageDays: 7,
-        videoViews: 500,
+        videoNum: 0,
+        videoViews: 0,
+        videoNumList: [{'text': 'No video', 'value': 0},{'text': '1', 'value': 1},{'text': '2', 'value': 2},{'text': '3', 'value': 3},{'text': '4', 'value': 4},{'text': '5', 'value': 5}],
         items2: [ 'Page', 'CRM', "Video" ],
     }),
 
@@ -106,9 +121,9 @@
         regions() {
           return this.brandData[this.currentBrand] ? this.brandData[this.currentBrand].map((item)=>item['Regions']) : [];
         },
-        // getDataForCurrentRegion() {
-        //   return this.currentBrand && this.currentRegion ? this.brandData[this.currentBrand].find(el => el['Regions'] === this.currentRegion) : undefined;
-        // },
+        currentCRM_Regions() {
+          return this.CRMData[this.currentBrand] ? this.CRMData[this.currentBrand].map((item)=>item['Regions']) : [];
+        },
         getDataForCurrentRegions() {
           if(this.currentRegions[this.currentBrand].length > 0) {
             let combinedData = [];
@@ -127,7 +142,27 @@
                 }  
             });
           }
-        }
+        },
+        getDisplayDataForSelectedCRMRegions() {
+          if(this.selectedCRM_Regions[this.currentBrand].length > 0) {
+            let combinedData = [];
+            if(this.currentBrand && this.selectedCRM_Regions[this.currentBrand].length > 0) {
+              // console.log(this.brandData,this.currentBrand, this.brandData['Heart']);
+              this.selectedCRM_Regions[this.currentBrand].forEach((region) => {
+                combinedData.push(this.CRMData[this.currentBrand].find(el => el['Regions'] === region));
+              });
+            }
+            return combinedData.reduce((prev, current) => {
+              return { 
+                'Volumes': prev['Volumes'] + current['Volumes'],
+                'Avg OR Reach': prev['Avg OR Reach'] + current['Avg OR Reach'],
+                'Solus': prev['Solus'] + current['Solus'],
+                'Newsletter': prev['Newsletter'] + current['Newsletter'],
+                'Banner': prev['Banner'] + current['Banner'], 
+                }  
+            });
+          }
+        },
     },
 
     watch: {
@@ -142,8 +177,8 @@
         let formatter = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'GBP',
-          maximumFractionDigits: 0 // (causes 2500.99 to be printed as £2,501)
-          //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as £2,500.1)
+          maximumFractionDigits: 0 // causes 2500.99 to be printed as £2,501
+          //minimumFractionDigits: 0, // this suffices for whole numbers, but will print 2500.10 as £2,500.1
         });
 
         return formatter.format(num); /* £2,500 */
@@ -151,12 +186,12 @@
     },
 
     created() {
-      // fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values/Heart?key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
-      fetch('https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?ranges=Heart&ranges=Capital&ranges=Smooth&ranges=CapitalXTRA&ranges=Classic&ranges=RadioX&ranges=LBC&ranges=Gold&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g')
+      const PageSheetNames = 'ranges=Page_'+radioBrands.join('&ranges=Page_');
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?${PageSheetNames}&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g`)
       .then(response => response.json())
       .then(data => {
           data['valueRanges'].forEach( sheet => {
-            let brand = sheet['range'].substring(0, sheet['range'].indexOf("!"));
+            let brand = sheet['range'].substring(5, sheet['range'].indexOf("!"));
             this.$set(sheetData, brand, sheet['values'].map( el => {
               let obj = {};
               sheet['values'][0].forEach((item,idx) => { obj[item] = isNaN(el[idx]) ? el[idx] : Number(el[idx]) })
@@ -164,9 +199,27 @@
             }));
             sheetData[brand].shift();
           });
-          brandList.push(...Object.keys(sheetData));
-          Object.keys(this.currentRegions).forEach(el => (this.currentRegions[el].push("NETWORK")));
+          // brandList.push(...Object.keys(sheetData));
+          // Object.keys(this.currentRegions).forEach(el => (this.currentRegions[el].push("NETWORK")));
       });
+
+      const CRMSheetNames = 'ranges=CRM_'+radioBrands.join('&ranges=CRM_');
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?${CRMSheetNames}&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g`)
+      .then(response => response.json())
+      .then(data => {
+          data['valueRanges'].forEach( sheet => {
+            let brand = sheet['range'].substring(4, sheet['range'].indexOf("!"));
+            this.$set(CRM_Data, brand, sheet['values'].map( el => {
+              let obj = {};
+              sheet['values'][0].forEach((item,idx) => { obj[item] = isNaN(el[idx]) ? el[idx] : Number(el[idx]) })
+              return obj;
+            }));
+            CRM_Data[brand].shift();
+          });
+          // Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
+      });
+
+      // this.videoViews = this.videoNum*200;
     },
 
   }
@@ -191,6 +244,10 @@
   .radio-logo {
     max-width: 90px;
     max-height: 36px;
+  }
+
+  .video-slider {
+    margin-top: 2rem;
   }
 </style>
 
