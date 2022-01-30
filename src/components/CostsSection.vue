@@ -3,8 +3,8 @@
     <v-sheet color="white">
       <!-- <v-container> -->
         <!-- <v-select :items="brands" outlined label="Radio brand" @change="selectChange($event)" v-model="currentBrand"></v-select> -->
-        <v-tabs height="65px" class="radio-tabs" v-model="radioBrandTab" background-color="deep-purple" fixed-tabs dark>
-          <v-tab v-for="(item, idx) in radioBrands" :key="item">
+        <v-tabs height="65px" class="radio-tabs" v-model="radioBrandTab" background-color="grey darken-2" fixed-tabs dark>
+          <v-tab v-for="(brand, idx) in radioBrands"  :class="radioTabEnabled(brand)" :key="brand">
             <img class="radio-logo" :src="'img/'+radioLogos[idx]" alt="">
           </v-tab>
         </v-tabs>
@@ -14,7 +14,7 @@
     <v-card>
       <v-sheet color="cyan" dark>
         <!-- <template v-slot:extension> -->
-          <v-tabs v-model="tab" background-color="deep-purple" fixed-tabs>
+          <v-tabs class="content-tablist" v-model="tab" background-color="deep-purple" fixed-tabs>
             <v-tab v-for="item in items2" :key="item">
               {{ item }}
             </v-tab>
@@ -22,7 +22,7 @@
         <!-- </template> -->
       </v-sheet>
 
-      <v-tabs-items class="tabs" v-model="tab">
+      <v-tabs-items class="content-tabs" v-model="tab">
         <v-tab-item>
           <v-card flat>
             <!-- <v-card-text v-text="text"></v-card-text> -->
@@ -47,7 +47,7 @@
             <h2>Video</h2>
             <!-- <v-text-field label="Videos" min="1" max="100" type="number" filled v-model="videoNum"/> -->
             <v-select :items="videoNumList" filled label="Number of videos" v-model="videoNum"></v-select>
-            <v-slider class="video-slider" v-model="videoViews" :readonly="videoNum==0" label="Video views / cost" thumb-color="#ff5252" thumb-label="always" :min="videoNum*200" :max="videoNum > 0 ? 4000 : 0" step="50" thumb-size="75">
+            <v-slider class="video-slider" v-model="videoViews" :readonly="videoNum==0" label="Video views / cost" thumb-color="#ff5252" thumb-label="always" :min="videoNum*200" :max="videoNum > 0 ? 4000 : 0" step="10" thumb-size="75">
               <template v-slot:thumb-label="item">
                 {{ item.value < 1000 ? item.value+'k' : item.value/1000+'M' }} <br> {{ cf(videoViews*50) }}
               </template>
@@ -170,6 +170,9 @@
     },
 
     methods: {
+      radioTabEnabled(brand) {
+        return this.currentRegions[brand].length !== 0 || this.selectedCRM_Regions[brand].length !== 0 ? 'radioTabEnabled' : '';
+      },
       selectChange(evt){
         console.log(evt);
       },
@@ -231,14 +234,21 @@
     max-width: 960px;
   }
 
-  .tabs h2 {
+  .content-tabs h2 {
     margin-bottom: 1rem;
   }
 
+  .content-tablist .v-tab--active {
+    background: #3b0f89;
+  }
 
-
-  .v-tab--active {
-      background: #3b0f89;
+  .radio-tabs {
+    .v-tab--active {
+        background: #424242;
+    }
+    .radioTabEnabled {
+      background-color: #3b0f89;
+    }
   }
 
   .radio-logo {
