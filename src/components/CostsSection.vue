@@ -4,7 +4,7 @@
       <!-- <v-container> -->
         <!-- <v-select :items="brands" outlined label="Radio brand" @change="selectChange($event)" v-model="currentBrand"></v-select> -->
         <v-tabs height="65px" class="radio-tabs" v-model="radioBrandTab" background-color="grey darken-2" fixed-tabs dark>
-          <v-tab v-for="(brand, idx) in radioBrands"  :class="radioTabEnabled(brand)" :key="brand">
+          <v-tab v-for="(brand, idx) in radioBrands" @change="selectChange($event)" :class="radioTabEnabled(brand)" :key="brand">
             <img class="radio-logo" :src="'img/'+radioLogos[idx]" alt="">
           </v-tab>
         </v-tabs>
@@ -77,9 +77,8 @@
         <h3>Banner: {{ cf(getDisplayDataForSelectedCRMRegions['Banner']) }}</h3>
         <hr>
       </div>
+      <h2>Total</h2>
       <h3 v-if="videoNum > 0">Video cost: {{ cf(videoViews*50) }}</h3> 
-      <!-- <hr> -->
-      <!-- <h3>Video Views</h3> -->
     </v-container>
   </v-container>
 </template>
@@ -152,6 +151,7 @@
                 combinedData.push(this.CRMData[this.currentBrand].find(el => el['Regions'] === region));
               });
             }
+            // console.log(combinedData);
             return combinedData.reduce((prev, current) => {
               return { 
                 'Volumes': prev['Volumes'] + current['Volumes'],
@@ -170,11 +170,39 @@
     },
 
     methods: {
+      getCombinedData(forBrand) {
+        let combinedData = [];
+        // Object.entries(this.selectedCRM_Regions).map((brand) => {console.log(brand[1]); return brand[1]; }).forEach((region) => {
+        //   console.log(region);
+        //   let theBrand = this.currentBrand;
+        //   if(Array.isArray(region)) {
+        //     theBrand = region[0];
+        //   }
+        //   // console.log(this.CRMData[theBrand]);
+        //   combinedData.push(this.CRMData[theBrand].find(el => el['Regions'] === region));
+        // });
+
+        if(forBrand === undefined) {
+          Object.entries(this.selectedCRM_Regions).forEach(([brand, regions]) => {
+            regions.forEach((region) => {
+              combinedData.push(this.CRMData[brand].find(el => el['Regions'] === region));
+            });
+          });
+        } else {
+          if(this.selectedCRM_Regions[forBrand].length > 0) {
+            this.selectedCRM_Regions[forBrand].forEach((region) => {
+              combinedData.push(this.CRMData[forBrand].find(el => el['Regions'] === region));
+            });
+          }
+        }
+        console.log(combinedData);
+      },
       radioTabEnabled(brand) {
         return this.currentRegions[brand].length !== 0 || this.selectedCRM_Regions[brand].length !== 0 ? 'radioTabEnabled' : '';
       },
       selectChange(evt){
         console.log(evt);
+        this.getCombinedData(this.currentBrand);
       },
       cf(num) { // currency formatting function
         let formatter = new Intl.NumberFormat('en-US', {
@@ -219,9 +247,9 @@
             }));
             CRM_Data[brand].shift();
           });
-          // Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
+          Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
+          this.getCombinedData();
       });
-
       // this.videoViews = this.videoNum*200;
     },
 
