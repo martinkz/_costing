@@ -176,12 +176,25 @@
         }
         return combinedData;
       },
+      calcTotalForDataProps(data, props) {
+        let summedData = {}
+        for (const prop of props) {
+          summedData[prop] = 0;
+        }
+        data.forEach((dataObj) => {
+          for (const prop of props) {
+            summedData[prop] += dataObj[prop];
+          }
+        });
+        return summedData;
+      },
       radioTabEnabled(brand) {
         return this.currentRegions[brand].length !== 0 || this.selectedCRM_Regions[brand].length !== 0 ? 'radioTabEnabled' : '';
       },
       selectChange(evt){
-        console.log(evt);
-        console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
+        // console.log(evt);
+        // console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
+        console.log(this.calcTotalForDataProps(this.getCombinedData(this.selectedCRM_Regions, this.CRMData), ['Volumes', 'Solus', 'Banner', 'Newsletter']));
       },
       cf(num) { // currency formatting function
         let formatter = new Intl.NumberFormat('en-US', {
@@ -227,7 +240,7 @@
             CRM_Data[brand].shift();
           });
           // Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
-        console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
+          // console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
       });
       // this.videoViews = this.videoNum*200;
     },
