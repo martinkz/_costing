@@ -125,13 +125,8 @@
         },
         getDataForCurrentRegions() {
           if(this.currentRegions[this.currentBrand].length > 0) {
-            let combinedData = [];
-            if(this.currentBrand && this.currentRegions[this.currentBrand].length > 0) {
-              // console.log(this.brandData,this.currentBrand, this.brandData['Heart']);
-              this.currentRegions[this.currentBrand].forEach((region) => {
-                combinedData.push(this.brandData[this.currentBrand].find(el => el['Regions'] === region));
-              });
-            }
+            let combinedData = this.getCombinedData(this.currentRegions, this.brandData, this.currentBrand);
+
             return combinedData.reduce((prev, current) => {
               return { 
                 'Monthly Home Page Views': prev['Monthly Home Page Views'] + current['Monthly Home Page Views'],
@@ -144,8 +139,8 @@
         },
         getDisplayDataForSelectedCRMRegions() {
           if(this.selectedCRM_Regions[this.currentBrand].length > 0) {
-            let combinedData = this.getCombinedData(this.currentBrand, this.selectedCRM_Regions, this.CRMData);
-            // console.log(combinedData);
+            let combinedData = this.getCombinedData(this.selectedCRM_Regions, this.CRMData, this.currentBrand);
+            
             return combinedData.reduce((prev, current) => {
               return { 
                 'Volumes': prev['Volumes'] + current['Volumes'],
@@ -164,18 +159,18 @@
     },
 
     methods: {
-      getCombinedData(forBrand, selectedDataObj, dataObj) {
+      getCombinedData(selectedData, allData, brand) {
         let combinedData = [];
-        if(forBrand === undefined) {
-          Object.entries(selectedDataObj).forEach(([brand, regions]) => {
+        if(brand === undefined) {
+          Object.entries(selectedData).forEach(([theBrand, regions]) => {
             regions.forEach((region) => {
-              combinedData.push(dataObj[brand].find(el => el['Regions'] === region));
+              combinedData.push(allData[theBrand].find(el => el['Regions'] === region));
             });
           });
         } else {
-          if(selectedDataObj[forBrand].length > 0) {
-            selectedDataObj[forBrand].forEach((region) => {
-              combinedData.push(dataObj[forBrand].find(el => el['Regions'] === region));
+          if(selectedData[brand].length > 0) {
+            selectedData[brand].forEach((region) => {
+              combinedData.push(allData[brand].find(el => el['Regions'] === region));
             });
           }
         }
@@ -186,7 +181,7 @@
       },
       selectChange(evt){
         console.log(evt);
-        console.log(this.getCombinedData(undefined, this.selectedCRM_Regions, this.CRMData));
+        console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
       },
       cf(num) { // currency formatting function
         let formatter = new Intl.NumberFormat('en-US', {
@@ -232,7 +227,7 @@
             CRM_Data[brand].shift();
           });
           // Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
-        console.log(this.getCombinedData(undefined, this.selectedCRM_Regions, this.CRMData));
+        console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
       });
       // this.videoViews = this.videoNum*200;
     },
