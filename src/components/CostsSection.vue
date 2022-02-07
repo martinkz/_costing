@@ -178,14 +178,11 @@
       },
       calcTotalForDataProps(data, props) {
         let summedData = {}
-        for (const prop of props) {
-          summedData[prop] = 0;
-        }
-        data.forEach((dataObj) => {
+        for (const dataObj of data) {
           for (const prop of props) {
-            summedData[prop] += dataObj[prop];
+            summedData[prop] = (summedData[prop] || 0) + dataObj[prop];
           }
-        });
+        };
         return summedData;
       },
       radioTabEnabled(brand) {
