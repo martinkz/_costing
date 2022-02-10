@@ -126,30 +126,15 @@
         getDataForCurrentRegions() {
           if(this.currentRegions[this.currentBrand].length > 0) {
             let combinedData = this.getCombinedData(this.currentRegions, this.brandData, this.currentBrand);
-
-            return combinedData.reduce((prev, current) => {
-              return { 
-                'Monthly Home Page Views': prev['Monthly Home Page Views'] + current['Monthly Home Page Views'],
-                'Daily Home Page Views': prev['Daily Home Page Views'] + current['Daily Home Page Views'],
-                'Daily Cost': prev['Daily Cost'] + current['Daily Cost'],
-                '7 day cost': prev['7 day cost'] + current['7 day cost'], 
-                }  
-            });
+            let page_fields = ['Monthly Home Page Views', 'Daily Home Page Views', 'Daily Cost', '7 day cost', 'UK Monthly full site views', 'UK Monthly users'];
+            return this.calcTotalForDataProps(combinedData, page_fields);
           }
         },
         getDisplayDataForSelectedCRMRegions() {
           if(this.selectedCRM_Regions[this.currentBrand].length > 0) {
             let combinedData = this.getCombinedData(this.selectedCRM_Regions, this.CRMData, this.currentBrand);
-            
-            return combinedData.reduce((prev, current) => {
-              return { 
-                'Volumes': prev['Volumes'] + current['Volumes'],
-                'Avg OR Reach': prev['Avg OR Reach'] + current['Avg OR Reach'],
-                'Solus': prev['Solus'] + current['Solus'],
-                'Newsletter': prev['Newsletter'] + current['Newsletter'],
-                'Banner': prev['Banner'] + current['Banner'], 
-                }  
-            });
+            let crm_fields = ['Volumes', 'Solus', 'Banner', 'Newsletter']
+            return this.calcTotalForDataProps(combinedData, crm_fields);
           }
         },
     },
