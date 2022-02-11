@@ -87,7 +87,6 @@
   // import costData from '../data/costData.js';
   let sheetData = {};
   let CRM_Data = {};
-  // let brandList = [];
   let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
   let radioBrands = ['Heart', 'Capital', 'Smooth', 'CapitalXTRA', 'Classic', 'RadioX', 'LBC', 'Gold'];
   let radioLogos = ['Heart_White_Nostrap.svg', 'Capital_White.png', 'smooth-white.png', 'CapitalXtra_White.png', 'Classic_white_min.svg', 'RadioX_Landscape_White.svg', 'LBC_White_Strap.svg', 'Gold.svg'];
@@ -99,7 +98,6 @@
         selectedCRM_Regions: Object.fromEntries(radioBrands.map(k => [k, []])),
         pageTypes: pageTypes,
         currentPageType: undefined,
-        // brands: brandList,
         brandData: sheetData,
         CRMData: CRM_Data,
         tab: null,
@@ -133,7 +131,7 @@
         getDisplayDataForSelectedCRMRegions() {
           if(this.selectedCRM_Regions[this.currentBrand].length > 0) {
             let combinedData = this.getCombinedData(this.selectedCRM_Regions, this.CRMData, this.currentBrand);
-            let crm_fields = ['Volumes', 'Solus', 'Banner', 'Newsletter']
+            let crm_fields = ['Volumes', 'Avg OR Reach', 'Solus', 'Banner', 'Newsletter']
             return this.calcTotalForDataProps(combinedData, crm_fields);
           }
         },
@@ -176,7 +174,7 @@
       selectChange(evt){
         // console.log(evt);
         // console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
-        console.log(this.calcTotalForDataProps(this.getCombinedData(this.selectedCRM_Regions, this.CRMData), ['Volumes', 'Solus', 'Banner', 'Newsletter']));
+        // console.log(this.calcTotalForDataProps(this.getCombinedData(this.selectedCRM_Regions, this.CRMData), ['Volumes', 'Solus', 'Banner', 'Newsletter']));
       },
       cf(num) { // currency formatting function
         let formatter = new Intl.NumberFormat('en-US', {
@@ -192,39 +190,30 @@
 
     created() {
       const PageSheetNames = 'ranges=Page_'+radioBrands.join('&ranges=Page_');
-      fetch(`https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?${PageSheetNames}&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g`)
+      const CRMSheetNames = 'ranges=CRM_'+radioBrands.join('&ranges=CRM_');
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?${PageSheetNames}&${CRMSheetNames}&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g`)
       .then(response => response.json())
       .then(data => {
           data['valueRanges'].forEach( sheet => {
-            let brand = sheet['range'].substring(5, sheet['range'].indexOf("!"));
-            this.$set(sheetData, brand, sheet['values'].map( el => {
+            let brand = sheet['range'].substring(sheet['range'].indexOf("_")+1, sheet['range'].indexOf("!"));
+            let type = sheet['range'].substring(0, sheet['range'].indexOf("_"));
+            let dataSet;
+            if(type === 'Page'){ 
+              dataSet = sheetData;
+            } else if(type === 'CRM') {
+              dataSet = CRM_Data;
+            } else {
+              console.log("Unknown sheet type");
+            }
+            this.$set(dataSet, brand, sheet['values'].map( el => {
               let obj = {};
-              sheet['values'][0].forEach((item,idx) => { obj[item] = isNaN(el[idx]) ? el[idx] : Number(el[idx]) })
+              sheet['values'][0].forEach((item,idx) => { obj[item] = (isNaN(el[idx]) ? el[idx] : Number(el[idx])) })
               return obj;
             }));
-            sheetData[brand].shift();
+            dataSet[brand].shift();
           });
-          // brandList.push(...Object.keys(sheetData));
           // Object.keys(this.currentRegions).forEach(el => (this.currentRegions[el].push("NETWORK")));
       });
-
-      const CRMSheetNames = 'ranges=CRM_'+radioBrands.join('&ranges=CRM_');
-      fetch(`https://sheets.googleapis.com/v4/spreadsheets/1lAnd6q6d_FbsCwj0YckfjQonUAn4uTMyUSGT9uThkiw/values:batchGet?${CRMSheetNames}&key=AIzaSyC7UqzaeVkFn9wXzUok5JyFMFLe6rehu7g`)
-      .then(response => response.json())
-      .then(data => {
-          data['valueRanges'].forEach( sheet => {
-            let brand = sheet['range'].substring(4, sheet['range'].indexOf("!"));
-            this.$set(CRM_Data, brand, sheet['values'].map( el => {
-              let obj = {};
-              sheet['values'][0].forEach((item,idx) => { obj[item] = isNaN(el[idx]) ? el[idx] : Number(el[idx]) })
-              return obj;
-            }));
-            CRM_Data[brand].shift();
-          });
-          // Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
-          // console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
-      });
-      // this.videoViews = this.videoNum*200;
     },
 
   }
