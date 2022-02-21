@@ -4,7 +4,7 @@
       <!-- <v-container> -->
         <!-- <v-select :items="brands" outlined label="Radio brand" @change="selectChange($event)" v-model="currentBrand"></v-select> -->
         <v-tabs height="65px" class="radio-tabs" v-model="radioBrandTab" background-color="grey darken-2" fixed-tabs dark>
-          <v-tab v-for="(brand, idx) in radioBrands" @change="selectChange($event)" :class="radioTabEnabled(brand)" :key="brand">
+          <v-tab v-for="(brand, idx) in radioBrands" :class="radioTabEnabled(brand)" :key="brand">
             <img class="radio-logo" :src="'img/'+radioLogos[idx]" alt="">
           </v-tab>
         </v-tabs>
@@ -15,7 +15,7 @@
       <v-sheet color="cyan" dark>
         <!-- <template v-slot:extension> -->
           <v-tabs class="content-tablist" v-model="tab" background-color="deep-purple" fixed-tabs>
-            <v-tab v-for="item in items2" :key="item">
+            <v-tab v-for="item in contentTypes" :key="item">
               {{ item }}
             </v-tab>
           </v-tabs>
@@ -28,7 +28,7 @@
             <!-- <v-card-text v-text="text"></v-card-text> -->
             <v-container>
               <h2>Competition page</h2>
-              <v-select :items="regions" filled label="Regions" multiple v-model="currentRegions[currentBrand]"></v-select>
+              <v-select :items="regions" filled label="Regions" multiple v-model="selectedPageRegions[currentBrand]"></v-select>
               <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
               <v-text-field label="Campaign Days" min="1" max="365" type="number" filled v-model="pageDays"/>
             </v-container>
@@ -60,13 +60,13 @@
     <v-container class="summary">
       <h2>Summary for {{ currentBrand }}</h2>
       <hr>
-      <div v-if="getDataForCurrentRegions">
-        <h3>Monthly Home Page Views: {{ getDataForCurrentRegions['Monthly Home Page Views'] }}</h3> 
-        <h3>Daily Home Page Views: {{ getDataForCurrentRegions['Daily Home Page Views'] }}</h3> 
-        <h3>Daily Cost: £{{ getDataForCurrentRegions['Daily Cost'].toFixed(2) }}</h3> 
-        <h3>{{pageDays}} day cost: £{{ (getDataForCurrentRegions['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
-        <h3 v-if="getDataForCurrentRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDataForCurrentRegions['UK Monthly full site views'] }}</h3> 
-        <h3 v-if="getDataForCurrentRegions['UK Monthly users']">UK Monthly users: {{ getDataForCurrentRegions['UK Monthly users'] }}</h3> 
+      <div v-if="getDisplayDataForSelectedPageRegions">
+        <h3>Monthly Home Page Views: {{ getDisplayDataForSelectedPageRegions['Monthly Home Page Views'] }}</h3> 
+        <h3>Daily Home Page Views: {{ getDisplayDataForSelectedPageRegions['Daily Home Page Views'] }}</h3> 
+        <h3>Daily Cost: £{{ getDisplayDataForSelectedPageRegions['Daily Cost'].toFixed(2) }}</h3> 
+        <h3>{{pageDays}} day cost: £{{ (getDisplayDataForSelectedPageRegions['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
+        <h3 v-if="getDisplayDataForSelectedPageRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDisplayDataForSelectedPageRegions['UK Monthly full site views'] }}</h3> 
+        <h3 v-if="getDisplayDataForSelectedPageRegions['UK Monthly users']">UK Monthly users: {{ getDisplayDataForSelectedPageRegions['UK Monthly users'] }}</h3> 
         <hr>
       </div>
       <div v-if="getDisplayDataForSelectedCRMRegions">
@@ -79,12 +79,13 @@
       </div>
       <h2>Total</h2>
       <h3 v-if="videoNum > 0">Video cost: {{ cf(videoViews*50) }}</h3> 
+      <hr>
+      <pre>{{ getDisplayDataForAllPageRegions }}</pre>
     </v-container>
   </v-container>
 </template>
 
 <script>
-  // import costData from '../data/costData.js';
   let sheetData = {};
   let CRM_Data = {};
   let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
@@ -94,7 +95,7 @@
   export default {
 
     data: () => ({
-        currentRegions: Object.fromEntries(radioBrands.map(k => [k, []])),
+        selectedPageRegions: Object.fromEntries(radioBrands.map(k => [k, []])),
         selectedCRM_Regions: Object.fromEntries(radioBrands.map(k => [k, []])),
         pageTypes: pageTypes,
         currentPageType: undefined,
@@ -108,7 +109,7 @@
         videoNum: 0,
         videoViews: 0,
         videoNumList: [{'text': 'No video', 'value': 0},{'text': '1', 'value': 1},{'text': '2', 'value': 2},{'text': '3', 'value': 3},{'text': '4', 'value': 4},{'text': '5', 'value': 5}],
-        items2: [ 'Page', 'CRM', "Video" ],
+        contentTypes: [ 'Page', 'CRM', "Video" ],
     }),
 
     computed: {
@@ -121,9 +122,9 @@
         currentCRM_Regions() {
           return this.CRMData[this.currentBrand] ? this.CRMData[this.currentBrand].map((item)=>item['Regions']) : [];
         },
-        getDataForCurrentRegions() {
-          if(this.currentRegions[this.currentBrand].length > 0) {
-            let combinedData = this.getCombinedData(this.currentRegions, this.brandData, this.currentBrand);
+        getDisplayDataForSelectedPageRegions() {
+          if(this.selectedPageRegions[this.currentBrand].length > 0) {
+            let combinedData = this.getCombinedData(this.selectedPageRegions, this.brandData, this.currentBrand);
             let page_fields = ['Monthly Home Page Views', 'Daily Home Page Views', 'Daily Cost', '7 day cost', 'UK Monthly full site views', 'UK Monthly users'];
             return this.calcTotalForDataProps(combinedData, page_fields);
           }
@@ -169,7 +170,7 @@
         return summedData;
       },
       radioTabEnabled(brand) {
-        return this.currentRegions[brand].length !== 0 || this.selectedCRM_Regions[brand].length !== 0 ? 'radioTabEnabled' : '';
+        return this.selectedPageRegions[brand].length !== 0 || this.selectedCRM_Regions[brand].length !== 0 ? 'radioTabEnabled' : '';
       },
       selectChange(evt){
         // console.log(evt);
@@ -212,7 +213,7 @@
             }));
             dataSet[brand].shift();
           });
-          // Object.keys(this.currentRegions).forEach(el => (this.currentRegions[el].push("NETWORK")));
+          // Object.keys(this.selectedPageRegions).forEach(el => (this.selectedPageRegions[el].push("NETWORK")));
       });
     },
 
