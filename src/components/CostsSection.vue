@@ -28,7 +28,7 @@
             <!-- <v-card-text v-text="text"></v-card-text> -->
             <v-container>
               <h2>Competition page</h2>
-              <v-select :items="regions" filled label="Regions" multiple v-model="selectedPageRegions[currentBrand]"></v-select>
+              <v-select :items="availablePageRegionsForCurrentBrand" filled label="Regions" multiple v-model="selectedPageRegions[currentBrand]"></v-select>
               <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
               <v-text-field label="Campaign Days" min="1" max="365" type="number" filled v-model="pageDays"/>
             </v-container>
@@ -38,7 +38,7 @@
         <v-tab-item>
           <v-container>
             <h2>CRM</h2>
-            <v-select :items="currentCRM_Regions" filled label="Regions" multiple v-model="selectedCRM_Regions[currentBrand]"></v-select>
+            <v-select :items="availableCRM_RegionsForCurrentBrand" filled label="Regions" multiple v-model="selectedCRM_Regions[currentBrand]"></v-select>
           </v-container>
         </v-tab-item>
         
@@ -96,21 +96,18 @@
 </template>
 
 <script>
-  let page_Data = {};
-  let CRM_Data = {};
-  let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
-  let radioBrands = ['Heart', 'Capital', 'Smooth', 'CapitalXTRA', 'Classic', 'RadioX', 'LBC', 'Gold'];
-  let radioLogos = ['Heart_White_Nostrap.svg', 'Capital_White.png', 'smooth-white.png', 'CapitalXtra_White.png', 'Classic_white_min.svg', 'RadioX_Landscape_White.svg', 'LBC_White_Strap.svg', 'Gold.svg'];
+  const radioBrands = ['Heart', 'Capital', 'Smooth', 'CapitalXTRA', 'Classic', 'RadioX', 'LBC', 'Gold'];
+  const radioLogos = ['Heart_White_Nostrap.svg', 'Capital_White.png', 'smooth-white.png', 'CapitalXtra_White.png', 'Classic_white_min.svg', 'RadioX_Landscape_White.svg', 'LBC_White_Strap.svg', 'Gold.svg'];
 
   export default {
 
     data: () => ({
         selectedPageRegions: Object.fromEntries(radioBrands.map(k => [k, []])),
         selectedCRM_Regions: Object.fromEntries(radioBrands.map(k => [k, []])),
-        pageTypes: pageTypes,
+        pageTypes: ["Enhanced Competition Page", "Budget Competition Page"],
         currentPageType: undefined,
-        pageData: page_Data,
-        CRMData: CRM_Data,
+        pageData: {},
+        CRMData: {},
         tab: null,
         radioBrandTab: 0,
         radioBrands: radioBrands,
@@ -126,10 +123,10 @@
         currentBrand() {
           return this.radioBrands[this.radioBrandTab];
         },
-        regions() {
+        availablePageRegionsForCurrentBrand() {
           return this.pageData[this.currentBrand] ? this.pageData[this.currentBrand].map((item)=>item['Regions']) : [];
         },
-        currentCRM_Regions() {
+        availableCRM_RegionsForCurrentBrand() {
           return this.CRMData[this.currentBrand] ? this.CRMData[this.currentBrand].map((item)=>item['Regions']) : [];
         },
         getDisplayPageData() {
@@ -140,10 +137,8 @@
           }
         },
         getDisplayPageDataForAllBrands() {
-            if(this.selectedPageRegions[this.currentBrand].length > 0) {
-              let page_fields = ['Monthly Home Page Views', 'Daily Home Page Views', 'Daily Cost', '7 day cost', 'UK Monthly full site views', 'UK Monthly users'];
-              return this.calcTotalForDataProps(this.getCombinedData(this.selectedPageRegions, this.pageData), page_fields);
-            }
+            let page_fields = ['Monthly Home Page Views', 'Daily Home Page Views', 'Daily Cost', '7 day cost', 'UK Monthly full site views', 'UK Monthly users'];
+            return this.calcTotalForDataProps(this.getCombinedData(this.selectedPageRegions, this.pageData), page_fields);
         },
         getDisplayCRMData() {
           if(this.selectedCRM_Regions[this.currentBrand].length > 0) {
@@ -153,10 +148,8 @@
           }
         },
         getDisplayCRMDataForAllBrands() {
-            if(this.selectedCRM_Regions[this.currentBrand].length > 0) {
-              let crm_fields = ['Volumes', 'Solus', 'Banner', 'Newsletter'];
-              return this.calcTotalForDataProps(this.getCombinedData(this.selectedCRM_Regions, this.CRMData), crm_fields);
-            }
+            let crm_fields = ['Volumes', 'Solus', 'Banner', 'Newsletter'];
+            return this.calcTotalForDataProps(this.getCombinedData(this.selectedCRM_Regions, this.CRMData), crm_fields);
         },
     },
 
@@ -196,8 +189,6 @@
       },
       selectChange(evt){
         // console.log(evt);
-        // console.log(this.getCombinedData(this.selectedCRM_Regions, this.CRMData));
-        // console.log(this.calcTotalForDataProps(this.getCombinedData(this.selectedCRM_Regions, this.CRMData), ['Volumes', 'Solus', 'Banner', 'Newsletter']));
       },
       cf(num) { // currency formatting function
         let formatter = new Intl.NumberFormat('en-US', {
@@ -222,9 +213,9 @@
             let type = sheet['range'].substring(0, sheet['range'].indexOf("_"));
             let dataSet;
             if(type === 'Page'){ 
-              dataSet = page_Data;
+              dataSet = this.pageData;
             } else if(type === 'CRM') {
-              dataSet = CRM_Data;
+              dataSet = this.CRMData;
             } else {
               console.log("Unknown sheet type");
             }
