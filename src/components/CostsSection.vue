@@ -58,35 +58,45 @@
     </v-card>
 
     <v-container class="summary">
+      <h2>Total</h2>
+      <div v-if="getDisplayPageDataForAllBrands">
+        <hr>
+        <pre>{{ getDisplayPageDataForAllBrands }}</pre>
+      </div>
+      <div v-if="getDisplayCRMDataForAllBrands">
+        <hr>
+        <pre>{{ getDisplayCRMDataForAllBrands }}</pre>
+      </div>
+      
+      <h3 v-if="videoNum > 0">
+        <hr>
+        Video cost: {{ cf(videoViews*50) }}
+      </h3> 
       <h2>Summary for {{ currentBrand }}</h2>
       <hr>
-      <div v-if="getDisplayDataForSelectedPageRegions">
-        <h3>Monthly Home Page Views: {{ getDisplayDataForSelectedPageRegions['Monthly Home Page Views'] }}</h3> 
-        <h3>Daily Home Page Views: {{ getDisplayDataForSelectedPageRegions['Daily Home Page Views'] }}</h3> 
-        <h3>Daily Cost: £{{ getDisplayDataForSelectedPageRegions['Daily Cost'].toFixed(2) }}</h3> 
-        <h3>{{pageDays}} day cost: £{{ (getDisplayDataForSelectedPageRegions['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
-        <h3 v-if="getDisplayDataForSelectedPageRegions['UK Monthly full site views']">UK Monthly full site views: {{ getDisplayDataForSelectedPageRegions['UK Monthly full site views'] }}</h3> 
-        <h3 v-if="getDisplayDataForSelectedPageRegions['UK Monthly users']">UK Monthly users: {{ getDisplayDataForSelectedPageRegions['UK Monthly users'] }}</h3> 
+      <div v-if="getDisplayPageData">
+        <h3>Monthly Home Page Views: {{ getDisplayPageData['Monthly Home Page Views'] }}</h3> 
+        <h3>Daily Home Page Views: {{ getDisplayPageData['Daily Home Page Views'] }}</h3> 
+        <h3>Daily Cost: £{{ getDisplayPageData['Daily Cost'].toFixed(2) }}</h3> 
+        <h3>{{pageDays}} day cost: £{{ (getDisplayPageData['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
+        <h3 v-if="getDisplayPageData['UK Monthly full site views']">UK Monthly full site views: {{ getDisplayPageData['UK Monthly full site views'] }}</h3> 
+        <h3 v-if="getDisplayPageData['UK Monthly users']">UK Monthly users: {{ getDisplayPageData['UK Monthly users'] }}</h3> 
         <hr>
       </div>
-      <div v-if="getDisplayDataForSelectedCRMRegions">
-        <h3>Volumes: {{ getDisplayDataForSelectedCRMRegions['Volumes'] }}</h3> 
-        <h3>Avg OR Reach: {{ getDisplayDataForSelectedCRMRegions['Avg OR Reach'] }}</h3> 
-        <h3>Solus: {{ cf(getDisplayDataForSelectedCRMRegions['Solus']) }}</h3>
-        <h3>Newsletter: {{ cf(getDisplayDataForSelectedCRMRegions['Newsletter']) }}</h3>
-        <h3>Banner: {{ cf(getDisplayDataForSelectedCRMRegions['Banner']) }}</h3>
+      <div v-if="getDisplayCRMData">
+        <h3>Volumes: {{ getDisplayCRMData['Volumes'] }}</h3> 
+        <h3>Avg OR Reach: {{ getDisplayCRMData['Avg OR Reach'] }}</h3> 
+        <h3>Solus: {{ cf(getDisplayCRMData['Solus']) }}</h3>
+        <h3>Newsletter: {{ cf(getDisplayCRMData['Newsletter']) }}</h3>
+        <h3>Banner: {{ cf(getDisplayCRMData['Banner']) }}</h3>
         <hr>
       </div>
-      <h2>Total</h2>
-      <h3 v-if="videoNum > 0">Video cost: {{ cf(videoViews*50) }}</h3> 
-      <hr>
-      <pre>{{ getDisplayDataForAllPageRegions }}</pre>
     </v-container>
   </v-container>
 </template>
 
 <script>
-  let sheetData = {};
+  let page_Data = {};
   let CRM_Data = {};
   let pageTypes = ["Enhanced Competition Page", "Budget Competition Page"];
   let radioBrands = ['Heart', 'Capital', 'Smooth', 'CapitalXTRA', 'Classic', 'RadioX', 'LBC', 'Gold'];
@@ -99,7 +109,7 @@
         selectedCRM_Regions: Object.fromEntries(radioBrands.map(k => [k, []])),
         pageTypes: pageTypes,
         currentPageType: undefined,
-        brandData: sheetData,
+        pageData: page_Data,
         CRMData: CRM_Data,
         tab: null,
         radioBrandTab: 0,
@@ -117,24 +127,36 @@
           return this.radioBrands[this.radioBrandTab];
         },
         regions() {
-          return this.brandData[this.currentBrand] ? this.brandData[this.currentBrand].map((item)=>item['Regions']) : [];
+          return this.pageData[this.currentBrand] ? this.pageData[this.currentBrand].map((item)=>item['Regions']) : [];
         },
         currentCRM_Regions() {
           return this.CRMData[this.currentBrand] ? this.CRMData[this.currentBrand].map((item)=>item['Regions']) : [];
         },
-        getDisplayDataForSelectedPageRegions() {
+        getDisplayPageData() {
           if(this.selectedPageRegions[this.currentBrand].length > 0) {
-            let combinedData = this.getCombinedData(this.selectedPageRegions, this.brandData, this.currentBrand);
+            let combinedData = this.getCombinedData(this.selectedPageRegions, this.pageData, this.currentBrand);
             let page_fields = ['Monthly Home Page Views', 'Daily Home Page Views', 'Daily Cost', '7 day cost', 'UK Monthly full site views', 'UK Monthly users'];
             return this.calcTotalForDataProps(combinedData, page_fields);
           }
         },
-        getDisplayDataForSelectedCRMRegions() {
+        getDisplayPageDataForAllBrands() {
+            if(this.selectedPageRegions[this.currentBrand].length > 0) {
+              let page_fields = ['Monthly Home Page Views', 'Daily Home Page Views', 'Daily Cost', '7 day cost', 'UK Monthly full site views', 'UK Monthly users'];
+              return this.calcTotalForDataProps(this.getCombinedData(this.selectedPageRegions, this.pageData), page_fields);
+            }
+        },
+        getDisplayCRMData() {
           if(this.selectedCRM_Regions[this.currentBrand].length > 0) {
             let combinedData = this.getCombinedData(this.selectedCRM_Regions, this.CRMData, this.currentBrand);
             let crm_fields = ['Volumes', 'Avg OR Reach', 'Solus', 'Banner', 'Newsletter']
             return this.calcTotalForDataProps(combinedData, crm_fields);
           }
+        },
+        getDisplayCRMDataForAllBrands() {
+            if(this.selectedCRM_Regions[this.currentBrand].length > 0) {
+              let crm_fields = ['Volumes', 'Solus', 'Banner', 'Newsletter'];
+              return this.calcTotalForDataProps(this.getCombinedData(this.selectedCRM_Regions, this.CRMData), crm_fields);
+            }
         },
     },
 
@@ -200,7 +222,7 @@
             let type = sheet['range'].substring(0, sheet['range'].indexOf("_"));
             let dataSet;
             if(type === 'Page'){ 
-              dataSet = sheetData;
+              dataSet = page_Data;
             } else if(type === 'CRM') {
               dataSet = CRM_Data;
             } else {
