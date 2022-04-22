@@ -1,140 +1,146 @@
 <template>
-  <v-container class="calculator-wrap">
-    <v-sheet color="white">
-      <!-- <v-container> -->
-        <!-- <v-select :items="brands" outlined label="Radio brand" @change="selectChange($event)" v-model="currentBrand"></v-select> -->
-        <v-tabs height="65px" class="radio-tabs" v-model="radioBrandTab" background-color="grey darken-2" fixed-tabs dark>
-          <v-tab v-for="(brand, idx) in radioBrands" :class="radioTabEnabled(brand)" :key="brand">
-            <img class="radio-logo" :src="'img/'+radioLogos[idx]" alt="">
-          </v-tab>
-        </v-tabs>
-      <!-- </v-container> -->
-    </v-sheet>
-    <v-container></v-container>
-    <v-card>
-      <v-sheet color="cyan" dark>
-        <!-- <template v-slot:extension> -->
-          <v-tabs class="content-tablist" v-model="tab" background-color="deep-purple" fixed-tabs>
-            <v-tab v-for="item in contentTypes" :key="item">
-              {{ item }}
-            </v-tab>
-          </v-tabs>
-        <!-- </template> -->
-      </v-sheet>
+  <v-container class="app-container">
+    <v-row>
+      <v-col cols="12" lg="8">
+        <!-- <v-container> -->
+          <v-sheet color="white">
+              <v-tabs height="65px" class="radio-tabs" v-model="radioBrandTab" background-color="grey darken-2" fixed-tabs dark>
+                <v-tab v-for="(brand, idx) in radioBrands" :class="radioTabEnabled(brand)" :key="brand">
+                  <img class="radio-logo" :src="'img/'+radioLogos[idx]" alt="">
+                </v-tab>
+              </v-tabs>
+          </v-sheet>
+          <v-container></v-container>
+          <v-card>
+            <v-sheet color="cyan" dark>
+              <!-- <template v-slot:extension> -->
+                <v-tabs class="content-tablist" v-model="tab" background-color="deep-purple" fixed-tabs>
+                  <v-tab v-for="item in contentTypes" :key="item">
+                    {{ item }}
+                  </v-tab>
+                </v-tabs>
+              <!-- </template> -->
+            </v-sheet>
 
-      <v-tabs-items class="content-tabs" v-model="tab">
-        <v-tab-item>
-          <v-card flat>
-            <!-- <v-card-text v-text="text"></v-card-text> -->
-            <v-container>
-              <h2>Competition page</h2>
-              <v-select :items="availablePageRegionsForCurrentBrand" filled label="Regions" multiple v-model="selectedPageRegions[currentBrand]"></v-select>
-              <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
-              <v-text-field label="Campaign Days" min="1" max="365" type="number" filled v-model="pageDays"/>
-            </v-container>
+            <v-tabs-items class="content-tabs" v-model="tab">
+              <v-tab-item>
+                <v-card flat>
+                  <!-- <v-card-text v-text="text"></v-card-text> -->
+                  <v-container>
+                    <h2>Competition page</h2>
+                    <v-select :items="availablePageRegionsForCurrentBrand" filled label="Regions" multiple v-model="selectedPageRegions[currentBrand]"></v-select>
+                    <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
+                    <v-text-field label="Campaign Days" min="1" max="365" type="number" filled v-model="pageDays"/>
+                  </v-container>
+                </v-card>
+              </v-tab-item>
+
+              <v-tab-item>
+                <v-container>
+                  <h2>CRM</h2>
+                  <v-select :items="availableCRM_RegionsForCurrentBrand" filled label="Regions" multiple v-model="selectedCRM_Regions[currentBrand]"></v-select>
+                </v-container>
+              </v-tab-item>
+          
+              <v-tab-item>
+                <v-container>
+                  <h2>Video</h2>
+                  <!-- <v-text-field label="Videos" min="1" max="100" type="number" filled v-model="videoNum"/> -->
+                  <v-select :items="videoNumList" filled label="Number of videos" v-model="videoNum"></v-select>
+                  <v-slider class="video-slider" v-model="videoViews" :readonly="videoNum==0" label="Video views / cost" thumb-color="#ff5252" thumb-label="always" :min="videoNum*200" :max="videoNum > 0 ? 4000 : 0" step="10" thumb-size="75">
+                    <template v-slot:thumb-label="item">
+                      {{ item.value < 1000 ? item.value+'k' : item.value/1000+'M' }} <br> {{ cf(videoViews*50) }}
+                    </template>
+                  </v-slider>
+                </v-container>
+              </v-tab-item>
+            </v-tabs-items>
           </v-card>
-        </v-tab-item>
+        <!-- </v-container> -->
+      </v-col>
 
-        <v-tab-item>
-          <v-container>
-            <h2>CRM</h2>
-            <v-select :items="availableCRM_RegionsForCurrentBrand" filled label="Regions" multiple v-model="selectedCRM_Regions[currentBrand]"></v-select>
-          </v-container>
-        </v-tab-item>
-        
-        <v-tab-item>
-          <v-container>
-            <h2>Video</h2>
-            <!-- <v-text-field label="Videos" min="1" max="100" type="number" filled v-model="videoNum"/> -->
-            <v-select :items="videoNumList" filled label="Number of videos" v-model="videoNum"></v-select>
-            <v-slider class="video-slider" v-model="videoViews" :readonly="videoNum==0" label="Video views / cost" thumb-color="#ff5252" thumb-label="always" :min="videoNum*200" :max="videoNum > 0 ? 4000 : 0" step="10" thumb-size="75">
-              <template v-slot:thumb-label="item">
-                {{ item.value < 1000 ? item.value+'k' : item.value/1000+'M' }} <br> {{ cf(videoViews*50) }}
-              </template>
-            </v-slider>
-          </v-container>
-        </v-tab-item>
-      </v-tabs-items>
-    </v-card>
+      <v-col cols="12" lg="4">
+        <v-container>
+          <h2 class="calculator-main-title">Cost calculator</h2>
+          <h3 v-if="videoNum > 0">
+            Video cost: {{ cf(videoViews*50) }}
+          </h3> 
 
-    <v-container class="summary">
-
-      <h3 v-if="videoNum > 0">
-        Video cost: {{ cf(videoViews*50) }}
-      </h3> 
-
-      <table class="cart-table" v-if="Object.keys(getDisplayPageDataForAllBrands).length !== 0">
-        <tr>
-          <th>Page Summary</th>
-          <th>{{ currentBrand }}</th>
-          <th>All Brands</th>
-        </tr>
-        <tr>
-          <td>Monthly Home Page Views</td>
-          <td>{{ getDisplayPageData ? getDisplayPageData['Monthly Home Page Views'] : 0 }}</td>
-          <td>{{ getDisplayPageDataForAllBrands['Monthly Home Page Views'] }}</td>
-        </tr> 
-        <tr>
-          <td>Daily Home Page Views</td>
-          <td>{{ getDisplayPageData ? getDisplayPageData['Daily Home Page Views'] : 0 }}</td>
-          <td>{{ getDisplayPageDataForAllBrands['Daily Home Page Views'] }}</td>
-        </tr> 
-        <tr>
-          <td>Daily Cost</td>
-          <td>£{{ getDisplayPageData ? getDisplayPageData['Daily Cost'].toFixed(2) : 0 }}</td>
-          <td>£{{ getDisplayPageDataForAllBrands['Daily Cost'].toFixed(2) }}</td>
-        </tr> 
-        <tr>
-          <td>{{pageDays}} day cost</td>
-          <td>£{{ getDisplayPageData ? (getDisplayPageData['Daily Cost'] * pageDays).toFixed(2) : 0 }}</td>
-          <td>£{{ (getDisplayPageDataForAllBrands['Daily Cost'] * pageDays).toFixed(2) }}</td>
-        </tr> 
-        <tr v-if="getDisplayPageData ? getDisplayPageData['UK Monthly full site views'] : false">
-          <td>UK Monthly full site views</td>
-          <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly full site views'] : 0 }}</td>
-          <td>{{ getDisplayPageDataForAllBrands['UK Monthly full site views'] }}</td>
-        </tr> 
-        <tr v-if="getDisplayPageData ? getDisplayPageData['UK Monthly users'] : false">
-          <td>UK Monthly users</td>
-          <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly users'] : 0 }}</td>
-          <td>{{ getDisplayPageDataForAllBrands['UK Monthly users'] }}</td>
-        </tr> 
-      </table>
-      <br>
-      <table class="cart-table" v-if="Object.keys(getDisplayCRMDataForAllBrands).length !== 0">
-        <tr>
-          <th>CRM Summary</th>
-          <th>{{ currentBrand }}</th>
-          <th>All Brands</th>
-        </tr>
-        <tr>
-          <td>Volumes</td>
-          <td>{{ getDisplayCRMData ? getDisplayCRMData['Volumes'] : 0 }}</td>
-          <td>{{ getDisplayCRMDataForAllBrands['Volumes'] }}</td>
-        </tr>
-        <tr>
-          <td>Avg OR Reach</td>
-          <td>{{ getDisplayCRMData ? getDisplayCRMData['Avg OR Reach'] : 0 }}</td>
-          <td>{{ getDisplayCRMDataForAllBrands['Avg OR Reach'] }}</td>
-        </tr>
-        <tr>
-          <td>Solus</td>
-          <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Solus'] : 0) }}</td>
-          <td>{{ cf(getDisplayCRMDataForAllBrands['Solus']) }}</td>
-        </tr>
-        <tr>
-          <td>Newsletter</td>
-          <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Newsletter'] : 0) }}</td>
-          <td>{{ cf(getDisplayCRMDataForAllBrands['Newsletter']) }}</td>
-        </tr>
-        <tr>
-          <td>Banner</td>
-          <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Banner'] : 0) }}</td>
-          <td>{{ cf(getDisplayCRMDataForAllBrands['Banner']) }}</td>
-        </tr>
-      </table>
-    </v-container>
+          <table class="cart-table" v-if="Object.keys(getDisplayPageDataForAllBrands).length !== 0">
+            <tr>
+              <th>Page Summary</th>
+              <th>{{ currentBrand }}</th>
+              <th>All Brands</th>
+            </tr>
+            <tr>
+              <td>Monthly Home Page Views</td>
+              <td>{{ getDisplayPageData ? getDisplayPageData['Monthly Home Page Views'] : 0 }}</td>
+              <td>{{ getDisplayPageDataForAllBrands['Monthly Home Page Views'] }}</td>
+            </tr> 
+            <tr>
+              <td>Daily Home Page Views</td>
+              <td>{{ getDisplayPageData ? getDisplayPageData['Daily Home Page Views'] : 0 }}</td>
+              <td>{{ getDisplayPageDataForAllBrands['Daily Home Page Views'] }}</td>
+            </tr> 
+            <tr>
+              <td>Daily Cost</td>
+              <td>£{{ getDisplayPageData ? getDisplayPageData['Daily Cost'].toFixed(2) : 0 }}</td>
+              <td>£{{ getDisplayPageDataForAllBrands['Daily Cost'].toFixed(2) }}</td>
+            </tr> 
+            <tr>
+              <td>{{pageDays}} day cost</td>
+              <td>£{{ getDisplayPageData ? (getDisplayPageData['Daily Cost'] * pageDays).toFixed(2) : 0 }}</td>
+              <td>£{{ (getDisplayPageDataForAllBrands['Daily Cost'] * pageDays).toFixed(2) }}</td>
+            </tr> 
+            <tr v-if="getDisplayPageData ? getDisplayPageData['UK Monthly full site views'] : false">
+              <td>UK Monthly full site views</td>
+              <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly full site views'] : 0 }}</td>
+              <td>{{ getDisplayPageDataForAllBrands['UK Monthly full site views'] }}</td>
+            </tr> 
+            <tr v-if="getDisplayPageData ? getDisplayPageData['UK Monthly users'] : false">
+              <td>UK Monthly users</td>
+              <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly users'] : 0 }}</td>
+              <td>{{ getDisplayPageDataForAllBrands['UK Monthly users'] }}</td>
+            </tr> 
+          </table>
+          <br>
+          <table class="cart-table" v-if="Object.keys(getDisplayCRMDataForAllBrands).length !== 0">
+            <tr>
+              <th>CRM Summary</th>
+              <th>{{ currentBrand }}</th>
+              <th>All Brands</th>
+            </tr>
+            <tr>
+              <td>Volumes</td>
+              <td>{{ getDisplayCRMData ? getDisplayCRMData['Volumes'] : 0 }}</td>
+              <td>{{ getDisplayCRMDataForAllBrands['Volumes'] }}</td>
+            </tr>
+            <tr>
+              <td>Avg OR Reach</td>
+              <td>{{ getDisplayCRMData ? getDisplayCRMData['Avg OR Reach'] : 0 }}</td>
+              <td>{{ getDisplayCRMDataForAllBrands['Avg OR Reach'] }}</td>
+            </tr>
+            <tr>
+              <td>Solus</td>
+              <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Solus'] : 0) }}</td>
+              <td>{{ cf(getDisplayCRMDataForAllBrands['Solus']) }}</td>
+            </tr>
+            <tr>
+              <td>Newsletter</td>
+              <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Newsletter'] : 0) }}</td>
+              <td>{{ cf(getDisplayCRMDataForAllBrands['Newsletter']) }}</td>
+            </tr>
+            <tr>
+              <td>Banner</td>
+              <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Banner'] : 0) }}</td>
+              <td>{{ cf(getDisplayCRMDataForAllBrands['Banner']) }}</td>
+            </tr>
+          </table>
+        </v-container>
+      </v-col>
+    </v-row>
   </v-container>
+
 </template>
 
 <script>
@@ -268,8 +274,8 @@
             }));
             dataSet[brand].shift();
           });
-          // Object.keys(this.selectedPageRegions).forEach(el => (this.selectedPageRegions[el].push("NETWORK")));
-          // Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
+          Object.keys(this.selectedPageRegions).forEach(el => (this.selectedPageRegions[el].push("NETWORK")));
+          Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
       });
     },
 
@@ -277,6 +283,10 @@
 </script>
 
 <style lang="scss" scoped>
+
+  .app-container {
+    max-width: 1440px;
+  }
 
   .calculator-wrap {
     max-width: 960px;
@@ -308,6 +318,11 @@
     margin-top: 2rem;
   }
 
+  .calculator-main-title {
+    margin: 0 0 20px;
+    text-transform: uppercase;
+  }
+
   .cart-table {
     border-collapse: collapse;
     
@@ -319,7 +334,7 @@
       border-bottom: 1px solid #c8c8c8;
     }
     td:nth-child(1), th:nth-child(1) {
-      width: 220px;
+      width: 210px;
       max-width: 100%;
     }
     td:nth-child(2), th:nth-child(2) {
