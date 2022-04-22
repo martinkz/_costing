@@ -58,39 +58,81 @@
     </v-card>
 
     <v-container class="summary">
-      <h2>Total</h2>
-      <div v-if="getDisplayPageDataForAllBrands">
-        <hr>
-        <pre>{{ getDisplayPageDataForAllBrands }}</pre>
-      </div>
-      <div v-if="getDisplayCRMDataForAllBrands">
-        <hr>
-        <pre>{{ getDisplayCRMDataForAllBrands }}</pre>
-      </div>
-      
+
       <h3 v-if="videoNum > 0">
-        <hr>
         Video cost: {{ cf(videoViews*50) }}
       </h3> 
-      <h2>Summary for {{ currentBrand }}</h2>
-      <hr>
-      <div v-if="getDisplayPageData">
-        <h3>Monthly Home Page Views: {{ getDisplayPageData['Monthly Home Page Views'] }}</h3> 
-        <h3>Daily Home Page Views: {{ getDisplayPageData['Daily Home Page Views'] }}</h3> 
-        <h3>Daily Cost: £{{ getDisplayPageData['Daily Cost'].toFixed(2) }}</h3> 
-        <h3>{{pageDays}} day cost: £{{ (getDisplayPageData['Daily Cost'] * pageDays).toFixed(2) }}</h3> 
-        <h3 v-if="getDisplayPageData['UK Monthly full site views']">UK Monthly full site views: {{ getDisplayPageData['UK Monthly full site views'] }}</h3> 
-        <h3 v-if="getDisplayPageData['UK Monthly users']">UK Monthly users: {{ getDisplayPageData['UK Monthly users'] }}</h3> 
-        <hr>
-      </div>
-      <div v-if="getDisplayCRMData">
-        <h3>Volumes: {{ getDisplayCRMData['Volumes'] }}</h3> 
-        <h3>Avg OR Reach: {{ getDisplayCRMData['Avg OR Reach'] }}</h3> 
-        <h3>Solus: {{ cf(getDisplayCRMData['Solus']) }}</h3>
-        <h3>Newsletter: {{ cf(getDisplayCRMData['Newsletter']) }}</h3>
-        <h3>Banner: {{ cf(getDisplayCRMData['Banner']) }}</h3>
-        <hr>
-      </div>
+
+      <table class="cart-table" v-if="Object.keys(getDisplayPageDataForAllBrands).length !== 0">
+        <tr>
+          <th>Page Summary</th>
+          <th>{{ currentBrand }}</th>
+          <th>All Brands</th>
+        </tr>
+        <tr>
+          <td>Monthly Home Page Views</td>
+          <td>{{ getDisplayPageData ? getDisplayPageData['Monthly Home Page Views'] : 0 }}</td>
+          <td>{{ getDisplayPageDataForAllBrands['Monthly Home Page Views'] }}</td>
+        </tr> 
+        <tr>
+          <td>Daily Home Page Views</td>
+          <td>{{ getDisplayPageData ? getDisplayPageData['Daily Home Page Views'] : 0 }}</td>
+          <td>{{ getDisplayPageDataForAllBrands['Daily Home Page Views'] }}</td>
+        </tr> 
+        <tr>
+          <td>Daily Cost</td>
+          <td>£{{ getDisplayPageData ? getDisplayPageData['Daily Cost'].toFixed(2) : 0 }}</td>
+          <td>£{{ getDisplayPageDataForAllBrands['Daily Cost'].toFixed(2) }}</td>
+        </tr> 
+        <tr>
+          <td>{{pageDays}} day cost</td>
+          <td>£{{ getDisplayPageData ? (getDisplayPageData['Daily Cost'] * pageDays).toFixed(2) : 0 }}</td>
+          <td>£{{ (getDisplayPageDataForAllBrands['Daily Cost'] * pageDays).toFixed(2) }}</td>
+        </tr> 
+        <tr v-if="getDisplayPageData ? getDisplayPageData['UK Monthly full site views'] : false">
+          <td>UK Monthly full site views</td>
+          <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly full site views'] : 0 }}</td>
+          <td>{{ getDisplayPageDataForAllBrands['UK Monthly full site views'] }}</td>
+        </tr> 
+        <tr v-if="getDisplayPageData ? getDisplayPageData['UK Monthly users'] : false">
+          <td>UK Monthly users</td>
+          <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly users'] : 0 }}</td>
+          <td>{{ getDisplayPageDataForAllBrands['UK Monthly users'] }}</td>
+        </tr> 
+      </table>
+      <br>
+      <table class="cart-table" v-if="Object.keys(getDisplayCRMDataForAllBrands).length !== 0">
+        <tr>
+          <th>CRM Summary</th>
+          <th>{{ currentBrand }}</th>
+          <th>All Brands</th>
+        </tr>
+        <tr>
+          <td>Volumes</td>
+          <td>{{ getDisplayCRMData ? getDisplayCRMData['Volumes'] : 0 }}</td>
+          <td>{{ getDisplayCRMDataForAllBrands['Volumes'] }}</td>
+        </tr>
+        <tr>
+          <td>Avg OR Reach</td>
+          <td>{{ getDisplayCRMData ? getDisplayCRMData['Avg OR Reach'] : 0 }}</td>
+          <td>{{ getDisplayCRMDataForAllBrands['Avg OR Reach'] }}</td>
+        </tr>
+        <tr>
+          <td>Solus</td>
+          <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Solus'] : 0) }}</td>
+          <td>{{ cf(getDisplayCRMDataForAllBrands['Solus']) }}</td>
+        </tr>
+        <tr>
+          <td>Newsletter</td>
+          <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Newsletter'] : 0) }}</td>
+          <td>{{ cf(getDisplayCRMDataForAllBrands['Newsletter']) }}</td>
+        </tr>
+        <tr>
+          <td>Banner</td>
+          <td>{{ cf(getDisplayCRMData ? getDisplayCRMData['Banner'] : 0) }}</td>
+          <td>{{ cf(getDisplayCRMDataForAllBrands['Banner']) }}</td>
+        </tr>
+      </table>
     </v-container>
   </v-container>
 </template>
@@ -148,7 +190,7 @@
           }
         },
         getDisplayCRMDataForAllBrands() {
-            let crm_fields = ['Volumes', 'Solus', 'Banner', 'Newsletter'];
+            let crm_fields = ['Volumes', 'Avg OR Reach', 'Solus', 'Banner', 'Newsletter'];
             return this.calcTotalForDataProps(this.getCombinedData(this.selectedCRM_Regions, this.CRMData), crm_fields);
         },
     },
@@ -227,6 +269,7 @@
             dataSet[brand].shift();
           });
           // Object.keys(this.selectedPageRegions).forEach(el => (this.selectedPageRegions[el].push("NETWORK")));
+          // Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
       });
     },
 
@@ -252,7 +295,7 @@
         background: #424242;
     }
     .radioTabEnabled {
-      background-color: #3b0f89;
+      background-color: #673ab7;
     }
   }
 
@@ -263,6 +306,25 @@
 
   .video-slider {
     margin-top: 2rem;
+  }
+
+  .cart-table {
+    border-collapse: collapse;
+    
+    td, th {
+      text-align: left;
+    }
+    tr {
+      // background: #e9e9e9;
+      border-bottom: 1px solid #c8c8c8;
+    }
+    td:nth-child(1), th:nth-child(1) {
+      width: 220px;
+      max-width: 100%;
+    }
+    td:nth-child(2), th:nth-child(2) {
+      width: 100px;
+    }
   }
 </style>
 
@@ -294,9 +356,12 @@
     }
   }
 
-  // .radio-tabs {
-  //   .v-tabs-bar {
-  //     height: 75px !important;
-  //   }
-  // }
+  .radio-tabs {
+    .v-tab--active {
+      background: #3b0f89 !important;
+    }
+    // .v-tabs-bar {
+    //   height: 75px !important;
+    // }
+  }
 </style>
