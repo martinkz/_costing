@@ -60,17 +60,16 @@
       </v-col>
 
       <v-col cols="12" lg="4">
-        <v-container>
+        <v-container class="calculator-wrap elevation-2">
           <h2 class="calculator-main-title">Cost calculator</h2>
-          <h3 v-if="videoNum > 0">
-            Video cost: {{ cf(videoViews*50) }}
-          </h3> 
+
+          <h3 class="calc-empty" v-if="Object.keys(getDisplayPageDataForAllBrands).length === 0 && Object.keys(getDisplayCRMDataForAllBrands).length === 0 && videoNum <= 0">Please make a selection</h3>
 
           <table class="cart-table" v-if="Object.keys(getDisplayPageDataForAllBrands).length !== 0">
             <tr>
-              <th>Page Summary</th>
+              <th>Page summary</th>
               <th>{{ currentBrand }}</th>
-              <th>All Brands</th>
+              <th>All brands</th>
             </tr>
             <tr>
               <td>Monthly Home Page Views</td>
@@ -106,9 +105,9 @@
           <br>
           <table class="cart-table" v-if="Object.keys(getDisplayCRMDataForAllBrands).length !== 0">
             <tr>
-              <th>CRM Summary</th>
+              <th>CRM summary</th>
               <th>{{ currentBrand }}</th>
-              <th>All Brands</th>
+              <th>All brands</th>
             </tr>
             <tr>
               <td>Volumes</td>
@@ -136,6 +135,19 @@
               <td>{{ cf(getDisplayCRMDataForAllBrands['Banner']) }}</td>
             </tr>
           </table>
+          <br>
+          <table class="cart-table" v-if="videoNum > 0">
+            <tr>
+              <th>Video summary</th>
+              <th></th>
+              <th>All brands</th>
+            </tr>
+            <tr>
+              <td>Video cost</td>
+              <td></td>
+              <td> {{ cf(videoViews*50) }}</td>
+            </tr>
+          </table> 
         </v-container>
       </v-col>
     </v-row>
@@ -274,8 +286,8 @@
             }));
             dataSet[brand].shift();
           });
-          Object.keys(this.selectedPageRegions).forEach(el => (this.selectedPageRegions[el].push("NETWORK")));
-          Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
+          // Object.keys(this.selectedPageRegions).forEach(el => (this.selectedPageRegions[el].push("NETWORK")));
+          // Object.keys(this.selectedCRM_Regions).forEach(el => (this.selectedCRM_Regions[el].push("NETWORK")));
       });
     },
 
@@ -321,10 +333,20 @@
   .calculator-main-title {
     margin: 0 0 20px;
     text-transform: uppercase;
+    background: #673ab7;
+    color: white;
+    padding: 7px 15px;
+    text-align: center;
+  }
+
+  .calculator-wrap {
+    background: white;
+    padding: 0 0 25px;
   }
 
   .cart-table {
     border-collapse: collapse;
+    margin: 0 15px;
     
     td, th {
       text-align: left;
@@ -340,6 +362,11 @@
     td:nth-child(2), th:nth-child(2) {
       width: 100px;
     }
+  }
+
+  .calc-empty {
+    text-align: center;
+    color: #999;
   }
 </style>
 
