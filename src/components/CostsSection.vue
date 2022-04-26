@@ -72,17 +72,17 @@
               <th>All brands</th>
             </tr>
             <tr>
-              <td>Monthly Home Page Views</td>
-              <td>{{ getDisplayPageData ? getDisplayPageData['Monthly Home Page Views'] : 0 }}</td>
-              <td>{{ getDisplayPageDataForAllBrands['Monthly Home Page Views'] }}</td>
+              <td>Monthly home page views</td>
+              <td>{{ getDisplayPageData ? getDisplayPageData['Monthly Home Page Views'].toLocaleString() : 0 }}</td>
+              <td>{{ getDisplayPageDataForAllBrands['Monthly Home Page Views'].toLocaleString() }}</td>
             </tr> 
             <tr>
-              <td>Daily Home Page Views</td>
-              <td>{{ getDisplayPageData ? getDisplayPageData['Daily Home Page Views'] : 0 }}</td>
-              <td>{{ getDisplayPageDataForAllBrands['Daily Home Page Views'] }}</td>
+              <td>Daily home page views</td>
+              <td>{{ getDisplayPageData ? getDisplayPageData['Daily Home Page Views'].toLocaleString() : 0 }}</td>
+              <td>{{ getDisplayPageDataForAllBrands['Daily Home Page Views'].toLocaleString() }}</td>
             </tr> 
             <tr>
-              <td>Daily Cost</td>
+              <td>Daily cost</td>
               <td>£{{ getDisplayPageData ? getDisplayPageData['Daily Cost'].toFixed(2) : 0 }}</td>
               <td>£{{ getDisplayPageDataForAllBrands['Daily Cost'].toFixed(2) }}</td>
             </tr> 
@@ -92,14 +92,14 @@
               <td>£{{ (getDisplayPageDataForAllBrands['Daily Cost'] * pageDays).toFixed(2) }}</td>
             </tr> 
             <tr v-if="getDisplayPageData ? getDisplayPageData['UK Monthly full site views'] : false">
-              <td>UK Monthly full site views</td>
-              <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly full site views'] : 0 }}</td>
-              <td>{{ getDisplayPageDataForAllBrands['UK Monthly full site views'] }}</td>
+              <td>UK monthly full site views</td>
+              <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly full site views'].toLocaleString() : 0 }}</td>
+              <td>{{ getDisplayPageDataForAllBrands['UK Monthly full site views'].toLocaleString() }}</td>
             </tr> 
             <tr v-if="getDisplayPageData ? getDisplayPageData['UK Monthly users'] : false">
-              <td>UK Monthly users</td>
-              <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly users'] : 0 }}</td>
-              <td>{{ getDisplayPageDataForAllBrands['UK Monthly users'] }}</td>
+              <td>UK monthly users</td>
+              <td>{{ getDisplayPageData ? getDisplayPageData['UK Monthly users'].toLocaleString() : 0 }}</td>
+              <td>{{ getDisplayPageDataForAllBrands['UK Monthly users'].toLocaleString() }}</td>
             </tr> 
           </table>
           <br>
@@ -111,13 +111,13 @@
             </tr>
             <tr>
               <td>Volumes</td>
-              <td>{{ getDisplayCRMData ? getDisplayCRMData['Volumes'] : 0 }}</td>
-              <td>{{ getDisplayCRMDataForAllBrands['Volumes'] }}</td>
+              <td>{{ getDisplayCRMData ? getDisplayCRMData['Volumes'].toLocaleString() : 0 }}</td>
+              <td>{{ getDisplayCRMDataForAllBrands['Volumes'].toLocaleString() }}</td>
             </tr>
             <tr>
               <td>Avg OR Reach</td>
-              <td>{{ getDisplayCRMData ? getDisplayCRMData['Avg OR Reach'] : 0 }}</td>
-              <td>{{ getDisplayCRMDataForAllBrands['Avg OR Reach'] }}</td>
+              <td>{{ getDisplayCRMData ? getDisplayCRMData['Avg OR Reach'].toLocaleString() : 0 }}</td>
+              <td>{{ getDisplayCRMDataForAllBrands['Avg OR Reach'].toLocaleString() }}</td>
             </tr>
             <tr>
               <td>Solus</td>
@@ -356,8 +356,12 @@
       border-bottom: 1px solid #c8c8c8;
     }
     td:nth-child(1), th:nth-child(1) {
-      width: 210px;
+      width: 230px;
       max-width: 100%;
+
+      @media(max-width: 1390px) {
+        width: 200px;
+      }
     }
     td:nth-child(2), th:nth-child(2) {
       width: 100px;
