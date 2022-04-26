@@ -27,7 +27,7 @@
                 <v-card flat>
                   <!-- <v-card-text v-text="text"></v-card-text> -->
                   <v-container>
-                    <h2>Competition page</h2>
+                    <h2>Competition page – {{ currentBrand }}</h2>
                     <v-select :items="availablePageRegionsForCurrentBrand" filled label="Regions" multiple v-model="selectedPageRegions[currentBrand]"></v-select>
                     <v-select :items="pageTypes" filled label="Page Type" v-model="currentPageType"></v-select>
                     <v-text-field label="Campaign Days" min="1" max="365" type="number" filled v-model="pageDays"/>
@@ -37,14 +37,14 @@
 
               <v-tab-item>
                 <v-container>
-                  <h2>CRM</h2>
+                  <h2>CRM – {{ currentBrand }} </h2>
                   <v-select :items="availableCRM_RegionsForCurrentBrand" filled label="Regions" multiple v-model="selectedCRM_Regions[currentBrand]"></v-select>
                 </v-container>
               </v-tab-item>
           
               <v-tab-item>
                 <v-container>
-                  <h2>Video</h2>
+                  <h2>Video (all brands)</h2>
                   <!-- <v-text-field label="Videos" min="1" max="100" type="number" filled v-model="videoNum"/> -->
                   <v-select :items="videoNumList" filled label="Number of videos" v-model="videoNum"></v-select>
                   <v-slider class="video-slider" v-model="videoViews" :readonly="videoNum==0" label="Video views / cost" thumb-color="#ff5252" thumb-label="always" :min="videoNum*200" :max="videoNum > 0 ? 4000 : 0" step="10" thumb-size="75">
