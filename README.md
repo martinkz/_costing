@@ -1,4 +1,5 @@
-# vue-test
+# Costing sheet experiment (unfinished, do not use)
+Uses Vue 2.
 
 ## Project setup
 ```
